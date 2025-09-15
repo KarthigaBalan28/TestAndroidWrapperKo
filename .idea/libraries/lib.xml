@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="lib">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/classes.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/androidx.biometric_110.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/konywidgets.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/android.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/androidX.fragment_110.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
