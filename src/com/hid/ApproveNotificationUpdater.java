@@ -48,11 +48,11 @@ public class ApproveNotificationUpdater implements Runnable {
 	private boolean isBioEnabled;
 	private Function onCompleteCB;
 	private Function pwdPromptCallback;
-	private WaitNotifyMonitor monitor;
+	WaitNotifyMonitor monitor;
 	private String consensus;
 	private static final String LOG_TAG = ApproveSDKConstants.HID_LOG_TAG;
 	private String password = "";
-	private Transaction transactionObj;
+	Transaction transactionObj;
 	private boolean isPasswordTimeoutFlow;
 
 	public ApproveNotificationUpdater(String txId, String status, String password, Context appContext,
@@ -142,7 +142,6 @@ public class ApproveNotificationUpdater implements Runnable {
 					ApproveSDKConstants.HID_PWD_PROMPT_PROGRESS_EVENT_CODE);
 		} catch (FingerprintAuthenticationRequiredException fe) {
 			Log.d(LOG_TAG, "HID:setNotificationStatus Fingerprint Required Exception " + fe.getStackTrace());
-			// bioAuth(transaction,transactionInfo);
 			showPasswordFlow(ApproveSDKConstants.HID_PWD_PROMPT_PROGRESS_EVENT_TYPE,
 					ApproveSDKConstants.HID_PWD_PROMPT_PROGRESS_EVENT_CODE);
 		} catch (PasswordRequiredException pe) {
@@ -199,7 +198,7 @@ public class ApproveNotificationUpdater implements Runnable {
 
 						@Override
 						public void onAuthSuccess() {
-							// Do Nothing
+							Log.d(LOG_TAG, "HID:setNotificationStatus Inside bioAuth Success ");
 						}
 
 						@Override
