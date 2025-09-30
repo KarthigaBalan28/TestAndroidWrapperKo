@@ -32,7 +32,7 @@ import com.konylabs.vm.Function;
 import android.content.Context;
 import android.util.Log;
 import androidx.fragment.app.FragmentActivity;
-
+@SuppressWarnings("java:S3776")
 public class ContainerRenewAsync implements Runnable {
 	private String password;
 	private Context appContext;
@@ -43,7 +43,7 @@ public class ContainerRenewAsync implements Runnable {
 	private FingerprintHandler.BiometricEventListener biometricEventListener;
 	private WaitNotifyMonitor monitor;
 	private Container container;
-	private static final String LOG_TAG = ApproveSDKConstants.LOG_TAG;
+	private static final String LOG_TAG = ApproveSDKConstants.HID_LOG_TAG;
 
 	public ContainerRenewAsync(String password, Context appContext,FragmentActivity activity,boolean isBioEnabled, Function promptCallback,
 			Function exceptionCallback,Container container) {

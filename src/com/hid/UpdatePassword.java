@@ -30,18 +30,18 @@ import com.konylabs.vm.Function;
 
 import android.content.Context;
 import android.util.Log;
-
+@SuppressWarnings({"java:S3776"})
 public class UpdatePassword implements Runnable {
 	private Context appContext;
 	private Function exceptionCallback;
 	private String newPassword;
 	private String oldPassword;
-	private Boolean isContainerPolicy;
+	private boolean isContainerPolicy;
 	private Container container;
-	private static final String LOG_TAG = ApproveSDKConstants.LOG_TAG;
+	private static final String LOG_TAG = ApproveSDKConstants.HID_LOG_TAG;
 
 	public UpdatePassword(String oldPassword, String newPassword, Context appContext, Function exceptionCallback,
-			Boolean isContainerPolicy, Container container) {
+			boolean isContainerPolicy, Container container) {
 		this.newPassword = newPassword;
 		this.oldPassword = oldPassword;
 		this.appContext = appContext;

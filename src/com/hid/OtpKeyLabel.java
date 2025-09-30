@@ -27,7 +27,7 @@ public enum OtpKeyLabel {
 	}
 
 	public String getCode() {
-		Log.d(ApproveSDKConstants.LOG_TAG, "HID:OtpKeyLabel getCode ---> OtpKeyLabel code: " + code);
+		Log.d(ApproveSDKConstants.HID_LOG_TAG, "HID:OtpKeyLabel getCode ---> OtpKeyLabel code: " + code);
 		return code;
 	}
 }

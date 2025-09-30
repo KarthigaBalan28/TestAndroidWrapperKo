@@ -26,7 +26,7 @@ import org.json.JSONObject;
 
 import android.content.Context;
 import android.util.Log;
-
+@SuppressWarnings("java:S3776")
 public class ContainerCreatorAsync implements Runnable {
 	private String activationCode;
 	private String pushId;
@@ -34,7 +34,7 @@ public class ContainerCreatorAsync implements Runnable {
 	private Function exceptionCallback;
 	private Function promptCallback;
 	private WaitNotifyMonitor monitor;
-	private static final String LOG_TAG = ApproveSDKConstants.LOG_TAG;
+	private static final String LOG_TAG = ApproveSDKConstants.HID_LOG_TAG;
 
 	public ContainerCreatorAsync(String activationCode, Context appContext, String pushID, Function promptCallback,
 			Function exceptionCallback, WaitNotifyMonitor monitor) {
@@ -52,12 +52,12 @@ public class ContainerCreatorAsync implements Runnable {
 			Device device = DeviceFactory.getDevice(appContext, new ConnectionConfiguration());
 			ContainerInitialization containerInitialization = new ContainerInitialization();
 			JSONObject jsonObj = new JSONObject(activationCode);
-			String containerCreationFlow = jsonObj.optString(ApproveSDKConstants.CONTAINER_FLOW_IDENTIFIER, "");
+			String containerCreationFlow = jsonObj.optString(ApproveSDKConstants.HID_CONTAINER_FLOW_IDENTIFIER, "");
 			if (containerCreationFlow.isEmpty()) {
 				Log.d(LOG_TAG, "HID:createContainer - Manual Activation process is invoked");
-				containerInitialization.userId = jsonObj.optString(ApproveSDKConstants.AC_USERID_KEY, "");
-				containerInitialization.inviteCode = jsonObj.optString(ApproveSDKConstants.AC_INVITE_CODE_KEY, "").toCharArray();
-				containerInitialization.serverUrl = jsonObj.optString(ApproveSDKConstants.AC_SERVICE_KEY, "");
+				containerInitialization.userId = jsonObj.optString(ApproveSDKConstants.HID_AC_USERID_KEY, "");
+				containerInitialization.inviteCode = jsonObj.optString(ApproveSDKConstants.HID_AC_INVITE_CODE_KEY, "").toCharArray();
+				containerInitialization.serverUrl = jsonObj.optString(ApproveSDKConstants.HID_AC_SERVICE_KEY, "");
 			} else {
 				containerInitialization.activationCode = activationCode.toCharArray();
 			}

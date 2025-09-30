@@ -31,6 +31,8 @@ public class ApproveSDKConstants {
 	public static final String HID_AUTH_EXCEPTION_CODE = "5001";
 	public static final String HID_BIO_AUTH_NOT_ENABLED = "NoBioAuth";
 	public static final String HID_SUCCESS_MESSAGE = "success";
+	public static final String HID_FAILURE_MESSAGE = "failure";
+	public static final String HID_ERROR_MESSAGE = "error";
 	public static final String HID_NO_EXCEPTION = "No Exception";
 	public static final String HID_GENERIC_EXCEPTION = "Exception";
 	public static final String HID_BIO_PROMPT_TITLE_PUSH_FLOW = "Use your fingerprint to view the transaction";

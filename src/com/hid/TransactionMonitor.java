@@ -1,7 +1,7 @@
 package com.hid;
 
 import com.hidglobal.ia.service.transaction.Transaction;
-
+@SuppressWarnings({"java:S2446","java:S2274"})
 public class TransactionMonitor {
     private Transaction transaction;
     private String consensus;

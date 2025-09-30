@@ -25,7 +25,8 @@ import com.konylabs.vm.Function;
 import android.content.Context;
 import android.util.Log;
 import androidx.fragment.app.FragmentActivity;
-
+@SuppressWarnings({"java:S1068", "java:S107", "java:S3776", "java:S1172",
+ "java:S4143","java:S1602","java:S1144"})
 public class SignatureGeneratorAsync implements Runnable {
 	private String inputString;
 	private Container container;
@@ -33,34 +34,51 @@ public class SignatureGeneratorAsync implements Runnable {
 	private boolean isBioEnabled;
 	private FragmentActivity activity;
 	private Function pwdPromptCB;
-	private Function SCB_signTransaction;
-	private Function FCB_signTransaction;
+	private Function signTransactionSuccessCallback;
+	private Function signTransactionFailureCallback;
 	private WaitNotifyMonitor monitor;
 	private String otpLabel;
-	private static final String LOG_TAG = ApproveSDKConstants.LOG_TAG;
+	private static final String LOG_TAG = ApproveSDKConstants.HID_LOG_TAG;
+	private static final String MSG_OTP = "HID:signTransaction OTP is ";
+	private static final String MSG_INVALID_PARAM = "HID:signTransaction InvalidParameterException";
+	private static final String MSG_LOST_CREDENTIALS = "HID:signTransaction LostCredentialsException";
+	private static final String MSG_INTERNAL = "HID:signTransaction InternalException";
+	private static final String MSG_AUTH_EXCEPTION = "HID:signTransaction AuthenticationException";
+	private static final String MSG_UNSUPPORTED_DEVICE = "HID:signTransaction UnsupportedDeviceException";
+	private static final String MSG_FP_AUTH_REQUIRED = "HID:signTransaction FingerprintAuthenticationRequiredException";
+	private static final String MSG_FP_NOT_ENROLLED = "HID:signTransaction FingerprintNotEnrolledException";
+	private static final String MSG_PWD_REQUIRED = "HID:signTransaction PasswordRequiredException";
+	private static final String MSG_PWD_EXPIRED = "HID:signTransaction PasswordExpiredException";
+	private static final String MSG_GENERIC_EXCEPTION = "HID:signTransaction Exception";
+	private static final String INVALID_PARAMETER_EXCEPTION = "InvalidParameterException";
+	private static final String LOST_CREDENTIALS_EXCEPTION = "LostCredentialsException";
+	private static final String INTERNAL_EXCEPTION = "InternalException";
+	private static final String AUTHENTICATION_EXCEPTION = "AuthenticationException";
+	private static final String UNSUPPORTED_DEVICE_EXCEPTION = "UnsupportedDeviceException";
+	private static final String FINGERPRINT_AUTHENTICATION_REQUIRED_EXCEPTION = "FingerprintAuthenticationRequiredException";
+	private static final String FINGERPRINT_NOT_ENROLLED_EXCEPTION = "FingerprintNotEnrolledException";
 
 	public SignatureGeneratorAsync(String inputString, Container container, boolean isBioEnabled, Function pwdPrompCB,
-			Function SCB_signTransaction, Function FCB_signTransaction, Context appContext, FragmentActivity activity,
+			Function signTransactionSuccessCallback, Function signTransactionFailureCallback, Context appContext, FragmentActivity activity,
 			WaitNotifyMonitor monitor, String otpLabel) {
 		this.inputString = inputString;
 		this.container = container;
 		this.isBioEnabled = isBioEnabled;
 		this.activity = activity;
 		this.pwdPromptCB = pwdPrompCB;
-		this.SCB_signTransaction = SCB_signTransaction;
-		this.FCB_signTransaction = FCB_signTransaction;
+		this.signTransactionSuccessCallback = signTransactionSuccessCallback;
+		this.signTransactionFailureCallback = signTransactionFailureCallback;
 		this.monitor = monitor;
 		this.otpLabel = otpLabel;
 	}
 
 	public void run() {
-//		Parameter[] filter = new Parameter[] { new Parameter(SDKConstants.KEY_PROPERTY_LABEL, otpLabel.toCharArray()) };
 		Parameter[] filter = new Parameter[]{new Parameter(SDKConstants.KEY_PROPERTY_USAGE, SDKConstants.KEY_PROPERTY_USAGE_OTP)};
 		try {
 			Key[] keys = container.findKeys(filter);
 			if (keys == null || keys.length == 0) {
 				Log.d(LOG_TAG, "HID:signTransaction - No OTP key found with label: " + otpLabel);
-				FCB_signTransaction.execute(new Object[] {"No OTP key found", "No OTP key found with label: " + otpLabel});
+				signTransactionFailureCallback.execute(new Object[] {"No OTP key found", "No OTP key found with label: " + otpLabel});
 				return;
 			}
 			
@@ -98,7 +116,7 @@ public class SignatureGeneratorAsync implements Runnable {
             Log.d(LOG_TAG, "HID:signTransaction - OTP key Lock Policy Type: " + lockPolicyType);
 			
 			AsyncOTPGenerator asyncOTPGenerator = (AsyncOTPGenerator) otpKey.getDefaultOTPGenerator();
-			String[] details = inputString.split(ApproveSDKConstants.TS_VALUES_SEPERATOR);
+			String[] details = inputString.split(ApproveSDKConstants.HID_TS_VALUES_SEPERATOR);
 			Log.d(LOG_TAG,"HID:signTransaction "+ Arrays.toString(details));
 			int len = details.length;
 			char[][] tsDetailsArray = new char[len][];
@@ -111,7 +129,7 @@ public class SignatureGeneratorAsync implements Runnable {
 			InputOCRAParameters inputOcraParameters = new InputOCRAParameters(null, null);
 			if (isBioEnabled) {
 				BiometricAuthService bioAuthService = new BiometricAuthService();
-				bioAuthService.setBiometricPrompt(activity, ApproveSDKConstants.BIO_PROMPT_TITLE_TS_FLOW,
+				bioAuthService.setBiometricPrompt(activity, ApproveSDKConstants.HID_BIO_PROMPT_TITLE_TS_FLOW,
 						container.getProtectionPolicy(), new FingerprintHandler.BiometricEventListener() {
 
 							@Override
@@ -121,7 +139,6 @@ public class SignatureGeneratorAsync implements Runnable {
 
 							@Override
 							public void onAuthFailed() {
-								// TODO Auto-generated method stub
 								Log.d(LOG_TAG, "HID:signTransaction setBiometricPrompt onAuthFailed");
 							}
 
@@ -129,20 +146,20 @@ public class SignatureGeneratorAsync implements Runnable {
 							public void onAuthError() {
 								new Thread(() -> {
 									invokePasswordAuth(asyncOTPGenerator, challenge, inputOcraParameters,
-											ApproveSDKConstants.PWD_PROMPT_PROGRESS_EVENT_TYPE,
-											ApproveSDKConstants.PWD_PROMPT_PROGRESS_EVENT_CODE);
+											ApproveSDKConstants.HID_PWD_PROMPT_PROGRESS_EVENT_TYPE,
+											ApproveSDKConstants.HID_PWD_PROMPT_PROGRESS_EVENT_CODE);
 								}).start();
 								Log.d(LOG_TAG, "HID:signTransaction setBiometricPrompt onAuthError");
 							}
 						});
 				char[] otp = asyncOTPGenerator.computeSignature(null, challenge, null, inputOcraParameters);
 				String otpStr = String.valueOf(otp);
-				SCB_signTransaction.execute(new Object[] { otpStr });
-				Log.d(LOG_TAG, "HID:signTransaction OTP is " + otpStr);
+				signTransactionSuccessCallback.execute(new Object[] { otpStr });
+				Log.d(LOG_TAG, MSG_OTP  + otpStr);
 			} else {
 				invokePasswordAuth(asyncOTPGenerator, challenge, inputOcraParameters,
-						ApproveSDKConstants.PWD_PROMPT_PROGRESS_EVENT_TYPE,
-						ApproveSDKConstants.PWD_PROMPT_PROGRESS_EVENT_CODE);
+						ApproveSDKConstants.HID_PWD_PROMPT_PROGRESS_EVENT_TYPE,
+						ApproveSDKConstants.HID_PWD_PROMPT_PROGRESS_EVENT_CODE);
 			}
 
 		} catch (InvalidChallengeException e) {
@@ -150,44 +167,43 @@ public class SignatureGeneratorAsync implements Runnable {
 			e.printStackTrace();
 			executeFailureCallback("InvalidChallengeException", e.getMessage());
 		} catch (InvalidParameterException e) {
-			Log.d(LOG_TAG, "HID:signTransaction InvalidParameterException" + e.getStackTrace());
+			Log.d(LOG_TAG, MSG_INVALID_PARAM  + e.getStackTrace());
 			e.printStackTrace();
-			executeFailureCallback("InvalidParameterException", e.getMessage());
+			executeFailureCallback(INVALID_PARAMETER_EXCEPTION, e.getMessage());
 		} catch (LostCredentialsException e) {
-			Log.d(LOG_TAG, "HID:signTransaction LostCredentialsException" + e.getStackTrace());
+			Log.d(LOG_TAG, MSG_LOST_CREDENTIALS  + e.getStackTrace());
 			e.printStackTrace();
-			executeFailureCallback("LostCredentialsException", e.getMessage());
+			executeFailureCallback(LOST_CREDENTIALS_EXCEPTION, e.getMessage());
 		} catch (InternalException e) {
-			Log.d(LOG_TAG, "HID:signTransaction InternalException" + e.getStackTrace());
+			Log.d(LOG_TAG, MSG_INTERNAL  + e.getStackTrace());
 			e.printStackTrace();
-			executeFailureCallback("InternalException", e.getMessage());
+			executeFailureCallback(INTERNAL_EXCEPTION, e.getMessage());
 		} catch (AuthenticationException e) {
-			Log.d(LOG_TAG, "HID:signTransaction AuthenticationException" + e.getStackTrace());
+			Log.d(LOG_TAG, MSG_AUTH_EXCEPTION  + e.getStackTrace());
 			e.printStackTrace();
-			executeFailureCallback("AuthenticationException", e.getMessage());
+			executeFailureCallback(AUTHENTICATION_EXCEPTION, e.getMessage());
 		} catch (UnsupportedDeviceException e) {
-			Log.d(LOG_TAG, "HID:signTransaction UnsupportedDeviceException" + e.getStackTrace());
+			Log.d(LOG_TAG, MSG_UNSUPPORTED_DEVICE + e.getStackTrace());
 			e.printStackTrace();
-			executeFailureCallback("UnsupportedDeviceException", e.getMessage());
+			executeFailureCallback(UNSUPPORTED_DEVICE_EXCEPTION, e.getMessage());
 		} catch (FingerprintAuthenticationRequiredException e) {
-			Log.d(LOG_TAG, "HID:signTransaction FingerprintAuthenticationRequiredException" + e.getStackTrace());
+			Log.d(LOG_TAG, MSG_FP_AUTH_REQUIRED  + e.getStackTrace());
 			e.printStackTrace();
-			executeFailureCallback("FingerprintAuthenticationRequiredException", e.getMessage());
+			executeFailureCallback(FINGERPRINT_AUTHENTICATION_REQUIRED_EXCEPTION, e.getMessage());
 		} catch (FingerprintNotEnrolledException e) {
-			Log.d(LOG_TAG, "HID:signTransaction FingerprintNotEnrolledException" + e.getStackTrace());
+			Log.d(LOG_TAG, MSG_FP_NOT_ENROLLED  + e.getStackTrace());
 			e.printStackTrace();
-			executeFailureCallback("FingerprintNotEnrolledException", e.getMessage());
+			executeFailureCallback(FINGERPRINT_NOT_ENROLLED_EXCEPTION, e.getMessage());
 		} catch (PasswordRequiredException e) {
-			Log.d(LOG_TAG, "HID:signTransaction PasswordRequiredException" + e.getStackTrace());
+			Log.d(LOG_TAG,MSG_PWD_REQUIRED  + e.getStackTrace());
 			e.printStackTrace();
 			executeFailureCallback("PasswordRequiredException", e.getMessage());
 		} catch (PasswordExpiredException e) {
-			Log.d(LOG_TAG, "HID:signTransaction PasswordExpiredException" + e.getStackTrace());
+			Log.d(LOG_TAG, MSG_PWD_EXPIRED + e.getStackTrace());
 			e.printStackTrace();
 			executeFailureCallback("PasswordExpiredException", e.getMessage());
 		} catch (Throwable t) {
-			// TODO Auto-generated catch block
-			Log.d(LOG_TAG, "HID:signTransaction Exception" + t.getStackTrace());
+			Log.d(LOG_TAG, MSG_GENERIC_EXCEPTION  + t.getStackTrace());
 			t.printStackTrace();
 			executeFailureCallback("Exception", t.getMessage());
 		}
@@ -202,7 +218,6 @@ public class SignatureGeneratorAsync implements Runnable {
 				monitor.wait();
 			}
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			Log.e(LOG_TAG, "HID:signTransaction showPasswordFlow Exception" + e.getStackTrace());
 			e.printStackTrace();
 		}
@@ -216,54 +231,52 @@ public class SignatureGeneratorAsync implements Runnable {
 		try {
 			otp = asyncOTPGenerator.computeSignature(password.toCharArray(), challenge, null, inputOcraParameters);
 			String otpStr = String.valueOf(otp);
-			SCB_signTransaction.execute(new Object[] { otpStr });
-			Log.d(LOG_TAG, "HID:signTransaction OTP is " + otpStr);
+			signTransactionSuccessCallback.execute(new Object[] { otpStr });
+			Log.d(LOG_TAG,MSG_OTP  + otpStr);
 		} catch (AuthenticationException e) {
-			 executeFailureCallback("AuthenticationException",e.getMessage());
-			Log.d(LOG_TAG, "HID:signTransaction AuthenticationException" + e.getStackTrace());
-//			invokePasswordAuth(asyncOTPGenerator, challenge, inputOcraParameters,
-//					ApproveSDKConstants.PWD_PROMPT_ERROR_EVENT_TYPE, ApproveSDKConstants.PWD_PROMPT_ERROR_EVENT_CODE);
+			 executeFailureCallback(AUTHENTICATION_EXCEPTION,e.getMessage());
+			Log.d(LOG_TAG, MSG_AUTH_EXCEPTION  + e.getStackTrace());
 			e.printStackTrace();
 		} catch (PasswordExpiredException e) {
-			Log.d(LOG_TAG, "HID:signTransaction PasswordExpiredException" + e.getStackTrace());
+			Log.d(LOG_TAG, MSG_PWD_EXPIRED  + e.getStackTrace());
 			invokePasswordAuth(asyncOTPGenerator, challenge, inputOcraParameters,
-					ApproveSDKConstants.PWD_PROMPT_ERROR_EVENT_TYPE, ApproveSDKConstants.PWD_EXPIRED_PROMPT_EVENT_CODE);
+					ApproveSDKConstants.HID_PWD_PROMPT_ERROR_EVENT_TYPE, ApproveSDKConstants.HID_PWD_EXPIRED_PROMPT_EVENT_CODE);
 			e.printStackTrace();
 		} catch (InvalidPasswordException e) {
 			Log.d(LOG_TAG, "HID:signTransaction InvalidPasswordException" + e.getStackTrace());
 			executeFailureCallback("InvalidPasswordException", e.getMessage());
 			e.printStackTrace();
 		} catch (LostCredentialsException e) {
-			Log.d(LOG_TAG, "HID:signTransaction LostCredentialsException" + e.getStackTrace());
-			executeFailureCallback("LostCredentialsException", e.getMessage());
+			Log.d(LOG_TAG, MSG_LOST_CREDENTIALS  + e.getStackTrace());
+			executeFailureCallback(LOST_CREDENTIALS_EXCEPTION, e.getMessage());
 			e.printStackTrace();
 		} catch (InternalException e) {
-			Log.d(LOG_TAG, "HID:signTransaction InternalException" + e.getStackTrace());
-			executeFailureCallback("InternalException", e.getMessage());
+			Log.d(LOG_TAG, MSG_INTERNAL  + e.getStackTrace());
+			executeFailureCallback(INTERNAL_EXCEPTION, e.getMessage());
 			e.printStackTrace();
 		} catch (UnsupportedDeviceException e) {
-			Log.d(LOG_TAG, "HID:signTransaction UnsupportedDeviceException" + e.getStackTrace());
-			executeFailureCallback("UnsupportedDeviceException", e.getMessage());
+			Log.d(LOG_TAG, MSG_UNSUPPORTED_DEVICE  + e.getStackTrace());
+			executeFailureCallback(UNSUPPORTED_DEVICE_EXCEPTION, e.getMessage());
 			e.printStackTrace();
 		} catch (FingerprintAuthenticationRequiredException e) {
-			Log.d(LOG_TAG, "HID:signTransaction FingerprintAuthenticationRequiredException" + e.getStackTrace());
-			executeFailureCallback("FingerprintAuthenticationRequiredException", e.getMessage());
+			Log.d(LOG_TAG, MSG_FP_AUTH_REQUIRED  + e.getStackTrace());
+			executeFailureCallback(FINGERPRINT_AUTHENTICATION_REQUIRED_EXCEPTION, e.getMessage());
 			e.printStackTrace();
 		} catch (FingerprintNotEnrolledException e) {
-			Log.d(LOG_TAG, "HID:signTransaction FingerprintNotEnrolledException" + e.getStackTrace());
-			executeFailureCallback("FingerprintNotEnrolledException", e.getMessage());
+			Log.d(LOG_TAG, MSG_FP_NOT_ENROLLED  + e.getStackTrace());
+			executeFailureCallback(FINGERPRINT_NOT_ENROLLED_EXCEPTION, e.getMessage());
 			e.printStackTrace();
 		} catch (PasswordRequiredException e) {
-			Log.d(LOG_TAG, "HID:signTransaction PasswordRequiredException" + e.getStackTrace());
+			Log.d(LOG_TAG, MSG_PWD_REQUIRED  + e.getStackTrace());
 			invokePasswordAuth(asyncOTPGenerator, challenge, inputOcraParameters,
-					ApproveSDKConstants.PWD_PROMPT_ERROR_EVENT_TYPE, ApproveSDKConstants.PWD_PROMPT_ERROR_EVENT_CODE);
+					ApproveSDKConstants.HID_PWD_PROMPT_ERROR_EVENT_TYPE, ApproveSDKConstants.HID_PWD_PROMPT_ERROR_EVENT_CODE);
 			e.printStackTrace();
 		} catch (InvalidParameterException e) {
-			Log.d(LOG_TAG, "HID:signTransaction InvalidParameterException" + e.getStackTrace());
-			executeFailureCallback("InvalidParameterException", e.getMessage());
+			Log.d(LOG_TAG, MSG_INVALID_PARAM  + e.getStackTrace());
+			executeFailureCallback(INVALID_PARAMETER_EXCEPTION, e.getMessage());
 			e.printStackTrace();
 		} catch (Exception e) {
-			Log.d(LOG_TAG, "HID:signTransaction Exception" + e.getStackTrace());
+			Log.d(LOG_TAG, MSG_GENERIC_EXCEPTION  + e.getStackTrace());
 			executeFailureCallback("GenericException", e.getMessage());
 			e.printStackTrace();
 		}
@@ -275,51 +288,51 @@ public class SignatureGeneratorAsync implements Runnable {
 		try {
 			otp = asyncOTPGenerator.computeSignature(null, challenge, null, inputOcraParameters);
 			String otpStr = String.valueOf(otp);
-			SCB_signTransaction.execute(new Object[] { otpStr });
-			Log.d(LOG_TAG, "HID:signTransaction OTP is " + otpStr);
+			signTransactionSuccessCallback.execute(new Object[] { otpStr });
+			Log.d(LOG_TAG, MSG_OTP  + otpStr);
 		} catch (PasswordExpiredException e) {
-			Log.d(LOG_TAG, "HID:signTransaction PasswordExpiredException" + e.getStackTrace());
+			Log.d(LOG_TAG, MSG_PWD_EXPIRED  + e.getStackTrace());
 			invokePasswordAuth(asyncOTPGenerator, challenge, inputOcraParameters,
-					ApproveSDKConstants.PWD_PROMPT_ERROR_EVENT_TYPE, ApproveSDKConstants.PWD_EXPIRED_PROMPT_EVENT_CODE);
+					ApproveSDKConstants.HID_PWD_PROMPT_ERROR_EVENT_TYPE, ApproveSDKConstants.HID_PWD_EXPIRED_PROMPT_EVENT_CODE);
 			e.printStackTrace();
 		} catch (InvalidPasswordException e) {
 			Log.d(LOG_TAG, "HID:signTransaction InvalidPasswordException" + e.getStackTrace());
 			executeFailureCallback("InvalidPasswordException", e.getMessage());
 			e.printStackTrace();
 		} catch (LostCredentialsException e) {
-			Log.d(LOG_TAG, "HID:signTransaction LostCredentialsException" + e.getStackTrace());
-			executeFailureCallback("LostCredentialsException", e.getMessage());
+			Log.d(LOG_TAG, MSG_LOST_CREDENTIALS  + e.getStackTrace());
+			executeFailureCallback(LOST_CREDENTIALS_EXCEPTION, e.getMessage());
 			e.printStackTrace();
 		} catch (InternalException e) {
-			Log.d(LOG_TAG, "HID:signTransaction InternalException" + e.getStackTrace());
-			executeFailureCallback("InternalException", e.getMessage());
+			Log.d(LOG_TAG, MSG_INTERNAL  + e.getStackTrace());
+			executeFailureCallback(INTERNAL_EXCEPTION, e.getMessage());
 			e.printStackTrace();
 		} catch (AuthenticationException e) {
-			Log.d(LOG_TAG, "HID:signTransaction AuthenticationException" + e.getStackTrace());
-			executeFailureCallback("AuthenticationException", e.getMessage());
+			Log.d(LOG_TAG, MSG_AUTH_EXCEPTION + e.getStackTrace());
+			executeFailureCallback(AUTHENTICATION_EXCEPTION, e.getMessage());
 			e.printStackTrace();
 		} catch (UnsupportedDeviceException e) {
-			Log.d(LOG_TAG, "HID:signTransaction UnsupportedDeviceException" + e.getStackTrace());
-			executeFailureCallback("UnsupportedDeviceException", e.getMessage());
+			Log.d(LOG_TAG, MSG_UNSUPPORTED_DEVICE  + e.getStackTrace());
+			executeFailureCallback(UNSUPPORTED_DEVICE_EXCEPTION, e.getMessage());
 			e.printStackTrace();
 		} catch (FingerprintAuthenticationRequiredException e) {
-			Log.d(LOG_TAG, "HID:signTransaction FingerprintAuthenticationRequiredException" + e.getStackTrace());
-			executeFailureCallback("FingerprintAuthenticationRequiredException", e.getMessage());
+			Log.d(LOG_TAG, MSG_FP_AUTH_REQUIRED  + e.getStackTrace());
+			executeFailureCallback(FINGERPRINT_AUTHENTICATION_REQUIRED_EXCEPTION, e.getMessage());
 			e.printStackTrace();
 		} catch (FingerprintNotEnrolledException e) {
-			Log.d(LOG_TAG, "HID:signTransaction FingerprintNotEnrolledException" + e.getStackTrace());
-			executeFailureCallback("FingerprintNotEnrolledException", e.getMessage());
+			Log.d(LOG_TAG,MSG_FP_NOT_ENROLLED  + e.getStackTrace());
+			executeFailureCallback(FINGERPRINT_NOT_ENROLLED_EXCEPTION, e.getMessage());
 			e.printStackTrace();
 		} catch (PasswordRequiredException e) {
-			Log.d(LOG_TAG, "HID:signTransaction PasswordRequiredException" + e.getStackTrace());
+			Log.d(LOG_TAG, MSG_PWD_REQUIRED  + e.getStackTrace());
 			executeFailureCallback("PasswordRequiredException", e.getMessage());
 			e.printStackTrace();
 		} catch (InvalidParameterException e) {
-			Log.d(LOG_TAG, "HID:signTransaction InvalidParameterException" + e.getStackTrace());
-			executeFailureCallback("InvalidParameterException", e.getMessage());
+			Log.d(LOG_TAG, MSG_INVALID_PARAM  + e.getStackTrace());
+			executeFailureCallback(INVALID_PARAMETER_EXCEPTION, e.getMessage());
 			e.printStackTrace();
 		} catch (Exception e) {
-			Log.d(LOG_TAG, "HID:signTransaction Exception" + e.getStackTrace());
+			Log.d(LOG_TAG, MSG_GENERIC_EXCEPTION  + e.getStackTrace());
 			executeFailureCallback("GenericException", e.getMessage());
 			e.printStackTrace();
 		}
@@ -327,9 +340,8 @@ public class SignatureGeneratorAsync implements Runnable {
 
 	private void executeFailureCallback(String exception, String message) {
 		try {
-			FCB_signTransaction.execute(new Object[] { exception, message });
+			signTransactionFailureCallback.execute(new Object[] { exception, message });
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			Log.d(LOG_TAG, "HID:signTransaction executeFailureCallback Exception" + e.getStackTrace());
 			e.printStackTrace();
 		}

@@ -21,9 +21,9 @@ import com.konylabs.vm.Function;
 import android.content.Context;
 import android.util.Log;
 import androidx.fragment.app.FragmentActivity;
-
+@SuppressWarnings({"java:S3776"})
 public class OTPGeneratorSync implements Runnable {
-	protected static final String LOG_TAG = ApproveSDKConstants.LOG_TAG;
+	protected static final String LOG_TAG = ApproveSDKConstants.HID_LOG_TAG;
 	private FragmentActivity activity;
 	private String password;
 	private boolean isBiometricEnabled;
@@ -56,7 +56,6 @@ public class OTPGeneratorSync implements Runnable {
 			ProtectionPolicy otpKeyPolicy = null;
 			OTPGenerator otpGenerator = null;
 			Parameter[] filter;
-//			filter = new Parameter[] { new Parameter(SDKConstants.KEY_PROPERTY_LABEL, otpLabel.toCharArray()) };
 			filter = new Parameter[]{new Parameter(SDKConstants.KEY_PROPERTY_USAGE, SDKConstants.KEY_PROPERTY_USAGE_OTP)};
 			
 			Key[] keys = container.findKeys(filter);

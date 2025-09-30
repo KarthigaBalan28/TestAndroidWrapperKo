@@ -1,6 +1,7 @@
 package com.hid;
 
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 
 import org.json.JSONArray;
@@ -9,7 +10,6 @@ import org.json.JSONObject;
 
 import com.hid.FingerprintHandler.BiometricEventListener;
 import com.hidglobal.ia.service.beans.ConnectionConfiguration;
-import com.hidglobal.ia.service.beans.KeyId;
 import com.hidglobal.ia.service.beans.Parameter;
 import com.hidglobal.ia.service.exception.AuthenticationException;
 import com.hidglobal.ia.service.exception.FingerprintAuthenticationRequiredException;
@@ -18,12 +18,10 @@ import com.hidglobal.ia.service.exception.InexplicitContainerException;
 import com.hidglobal.ia.service.exception.InternalException;
 import com.hidglobal.ia.service.exception.InvalidContainerException;
 import com.hidglobal.ia.service.exception.InvalidParameterException;
-import com.hidglobal.ia.service.exception.InvalidPasswordException;
 import com.hidglobal.ia.service.exception.LostCredentialsException;
 import com.hidglobal.ia.service.exception.PasswordRequiredException;
 import com.hidglobal.ia.service.exception.PasswordExpiredException;
 import com.hidglobal.ia.service.exception.RemoteException;
-import com.hidglobal.ia.service.exception.ServerAuthenticationException;
 import com.hidglobal.ia.service.exception.ServerOperationFailedException;
 import com.hidglobal.ia.service.exception.ServerUnsupportedOperationException;
 import com.hidglobal.ia.service.exception.TransactionCanceledException;
@@ -44,19 +42,18 @@ import com.hidglobal.ia.service.transaction.CancelationReason;
 import com.konylabs.vm.Function;
 
 import android.content.Context;
-import android.text.format.DateFormat;
 import android.util.Log;
 import androidx.fragment.app.FragmentActivity;
 
+@SuppressWarnings({"java:S1126", "java:S2446", "java:S1149", "java:S1186", "java:S3776", "java:S1481", "java:S1854", "java:S1141", "java:S1874", "java:S1066", "java:S3626", "java:S6541", "java:S2259"})
 public class ApproveSDKWrapper {
 	private WaitNotifyMonitor monitor;
 	private TransactionMonitor transactionMonitor;
 	private Container container;
 	private Context appContext;
-	private static final String LOG_TAG = ApproveSDKConstants.LOG_TAG;
+	private static final String LOG_TAG = ApproveSDKConstants.HID_LOG_TAG;
 	private WaitNotifyMonitor signTransactionMonitor;
 	private WaitNotifyMonitor notificationMonitor;
-	private Transaction notificationTransaction;
 	private String username;
 	private FragmentActivity activity;
 
@@ -113,20 +110,13 @@ public class ApproveSDKWrapper {
 		if (isBioEnabled) {
 			containerRenewAsync.setBiometricEventListener(new BiometricEventListener() {
 				@Override
-				public void onAuthSuccess() {
-
-				}
+				public void onAuthSuccess() {}
 
 				@Override
-				public void onAuthFailed() {
-
-				}
+				public void onAuthFailed() {}
 
 				@Override
-				public void onAuthError() {
-					// TODO Auto-generated method stub
-
-				}
+				public void onAuthError() {}
 			});
 		}
 		thread.start();
@@ -139,14 +129,17 @@ public class ApproveSDKWrapper {
 	 * @param appContext - Context of the application.
 	 * @return String - JSON String containing the Password/Pin Policy details.
 	 */
-	public String getPasswordPolicy(Context appContext) {
+	public String getPasswordPolicy(Context appContext){
 		Log.d(LOG_TAG, "HID:getPasswordPolicy");
 		this.appContext = appContext;
-		Container container = getSingleUserContainer();
-		int ProfileExpiryDays = getContainerRenewableDate();
+		Container singleContainer = getSingleUserContainer();
+		int profileExpiryDays = getContainerRenewableDate();
 		JSONObject obj = new JSONObject();
 		try {
-			ProtectionPolicy policy = container.getProtectionPolicy();
+			if (singleContainer == null) {
+		        throw new IllegalArgumentException("HID:getPasswordPolicy Container must not be null.");
+		    }
+			ProtectionPolicy policy = singleContainer.getProtectionPolicy();
 			PasswordPolicy passwordPolicy = (PasswordPolicy) policy;
 			Log.d(LOG_TAG, "HID:getPasswordPolicy policy instanceof PasswordPolicy");
 			obj.put("maxAge", passwordPolicy.getMaxAge());
@@ -165,11 +158,10 @@ public class ApproveSDKWrapper {
 			obj.put("maxSpl", passwordPolicy.getMaxNonAlpha());
 			obj.put("minSpl", passwordPolicy.getMinNonAlpha());
 			obj.put("isSequenceAllowed", passwordPolicy.isSequenceAllowed());
-			obj.put("profileExpiryDate", ProfileExpiryDays + "");
+			obj.put("profileExpiryDate", profileExpiryDays + "");
 			Log.d(LOG_TAG, "HID:getPasswordPolicy - PasswordPolicy is " + obj.toString());
 			return obj.toString();
 		} catch (JSONException e2) {
-			// TODO Auto-generated catch block
 			Log.d(LOG_TAG, "HID:getPasswordPolicy: JSONException" + e2.getStackTrace());
 			e2.printStackTrace();
 		} catch (UnsupportedDeviceException e) {
@@ -213,13 +205,16 @@ public class ApproveSDKWrapper {
 	 * @return int - Number of days left for the container to be renewable.
 	 */
 	public int getContainerRenewableDate() {
-		Container container = getSingleUserContainer();
+		Container singleContainer = getSingleUserContainer();
 		Log.d(LOG_TAG, "HID In getContainerRenewableDate");
-		Date containerRenewalDate = container.getRenewalDate();
+		if (singleContainer == null) {
+	        throw new IllegalArgumentException("HID:getContainerRenewableDate Container must not be null.");
+	    }
+		Date containerRenewalDate = singleContainer.getRenewalDate();
 		Log.d(LOG_TAG, "HID:getContainerRenewableDate containerRenewalDate" + containerRenewalDate.toString());
-		long containerStart = container.getCreationDate().getTime();
+		long containerStart = singleContainer.getCreationDate().getTime();
 		Log.d(LOG_TAG, "HID:getContainerRenewableDate containerStart" + containerStart);
-		long containerExpiry = container.getExpiryDate().getTime();
+		long containerExpiry = singleContainer.getExpiryDate().getTime();
 		Log.d(LOG_TAG, "HID:getContainerRenewableDate containerExpiry" + containerExpiry);
 		int endDays = getDaysFromMilli(getWrtCurrentTime(containerExpiry));
 		int totalDays = getDaysFromMilli(Math.abs(containerExpiry - containerStart));
@@ -276,13 +271,14 @@ public class ApproveSDKWrapper {
 	 * 
 	 * @param container - Container to check if it is renewable.
 	 * @return Boolean true if renewable, false otherwise
-	 */
+	 
 	private Boolean isContainerRenewable(Container container) {
-		if (container.isRenewable(null)) {
+		if(container.isRenewable(null)) {
 			return true;
 		}
 		return false;
 	}
+	*/
 
 	/**
 	 * This public method is used to set the Password/Pin for the User.
@@ -309,8 +305,7 @@ public class ApproveSDKWrapper {
 	 *         container exists, "MultiLogin,userId1|userId2|..." if multiple
 	 *         containers exist)
 	 */
-	public String getLoginFlow(Context appContext, String pushID, Function genericExecuteCallback)
-			throws InvalidPasswordException, FingerprintNotEnrolledException, PasswordRequiredException {
+	public String getLoginFlow(Context appContext, String pushID, Function genericExecuteCallback){
 		try {
 			Device device = DeviceFactory.getDevice(appContext, new ConnectionConfiguration());
 			Container[] containers = device.findContainers(new Parameter[0]);
@@ -320,8 +315,8 @@ public class ApproveSDKWrapper {
 			}
 			if (containers.length == 1) {
 				Log.d(LOG_TAG, "HID:getLoginFlow Single container exist");
-				Log.d("ApproveSDKWrapper", "HID:getLoginFlow Single container: " + containers.toString());
-		        Log.d("ApproveSDKWrapper", "HID:getLoginFlow Single container getUserId: " + containers[0].getUserId());
+				Log.d(LOG_TAG, "HID:getLoginFlow Single container: " + Arrays.toString(containers));
+		        Log.d(LOG_TAG, "HID:getLoginFlow Single container getUserId: " + containers[0].getUserId());
 				container = containers[0];
 				
 				this.getInfo(appContext);
@@ -338,7 +333,8 @@ public class ApproveSDKWrapper {
 			}
 			StringBuffer multiUsers = new StringBuffer("MultiLogin,");
 			for (Container c : containers) {
-				multiUsers.append(c.getUserId() + "|");
+				multiUsers.append(c.getUserId());
+			    multiUsers.append("|");
 				Log.d(LOG_TAG, "HID:getLoginFlow Multi container exist" + c.getUserId());
 			}
 			Log.d(LOG_TAG, "HID:getLoginFlow Multi container: " + multiUsers.toString());
@@ -346,36 +342,36 @@ public class ApproveSDKWrapper {
 			return multiUsers.substring(0, multiUsers.length() - 1);
 		} catch (UnsupportedDeviceException e) {
 			Log.d(LOG_TAG, "HID:getLoginFlow: UnsupportedDeviceException" + e.getStackTrace());
-			genericExecuteCallback("UnsupportedDeviceException", e.getMessage(), genericExecuteCallback);
+			genericExecuteCallback(ApproveSDKConstants.HID_UNSUPPORTED_DEVICE_EXCEPTION, e.getMessage(), genericExecuteCallback);
 			e.printStackTrace();
 		} catch (InternalException e) {
 			Log.d(LOG_TAG, "HID:getLoginFlow: InternalException" + e.getStackTrace());
-			genericExecuteCallback("InternalException", e.getMessage(), genericExecuteCallback);
+			genericExecuteCallback(ApproveSDKConstants.HID_INTERNAL_EXCEPTION, e.getMessage(), genericExecuteCallback);
 			e.printStackTrace();
 		} catch (LostCredentialsException e) {
 			Log.d(LOG_TAG, "HID:getLoginFlow: LostCredentialsException" + e.getStackTrace());
-			genericExecuteCallback("LostCredentialsException", e.getMessage(), genericExecuteCallback);
+			genericExecuteCallback(ApproveSDKConstants.HID_LOST_CREDENTIALS_EXCEPTION, e.getMessage(), genericExecuteCallback);
 			e.printStackTrace();
 		} catch (AuthenticationException e) {
 			Log.d(LOG_TAG, "HID:getLoginFlow: AuthenticationException" + e.getStackTrace());
-			genericExecuteCallback("AuthenticationException", e.getMessage(), genericExecuteCallback);
+			genericExecuteCallback(ApproveSDKConstants.HID_AUTHENTICATION_EXCEPTION, e.getMessage(), genericExecuteCallback);
 			e.printStackTrace();
 		} catch (FingerprintAuthenticationRequiredException e) {
 			Log.d(LOG_TAG, "HID:getLoginFlow: FingerprintAuthenticationRequiredException" + e.getStackTrace());
-			genericExecuteCallback("FingerprintAuthenticationRequiredException", e.getMessage(),
+			genericExecuteCallback(ApproveSDKConstants.HID_FINGERPRINT_AUTHENTICATION_REQUIRED_EXCEPTION, e.getMessage(),
 					genericExecuteCallback);
 			e.printStackTrace();
 		} catch (RemoteException e) {
 			Log.d(LOG_TAG, "HID:getLoginFlow: RemoteException" + e.getStackTrace());
-			genericExecuteCallback("RemoteException", e.getMessage(), genericExecuteCallback);
+			genericExecuteCallback(ApproveSDKConstants.HID_REMOTE_EXCEPTION, e.getMessage(), genericExecuteCallback);
 			e.printStackTrace();
 		} catch (InvalidParameterException e) {
 			Log.d(LOG_TAG, "HID:getLoginFlow: InvalidParameterException" + e.getStackTrace());
-			genericExecuteCallback("InvalidParameterException", e.getMessage(), genericExecuteCallback);
+			genericExecuteCallback(ApproveSDKConstants.HID_INVALID_PARAMETER_EXCEPTION, e.getMessage(), genericExecuteCallback);
 			e.printStackTrace();
 		} catch (ServerOperationFailedException e) {
 			Log.d(LOG_TAG, "HID:getLoginFlow: ServerOperationFailedException" + e.getStackTrace());
-			genericExecuteCallback("ServerOperationFailedException", e.getMessage(), genericExecuteCallback);
+			genericExecuteCallback(ApproveSDKConstants.HID_SERVER_OPERATION_FAILED_EXCEPTION, e.getMessage(), genericExecuteCallback);
 			e.printStackTrace();
 		} catch (Exception e) {
 			Log.d(LOG_TAG, "HID:getLoginFlow: Exception" + e.getStackTrace());
@@ -401,7 +397,7 @@ public class ApproveSDKWrapper {
 	public void generateOTP(FragmentActivity activity, String password, boolean isBiometricEnabled,
 			Function otpSuccessCallback, Function otpFailureCallback, String otpLabel) {
 		String label = OtpKeyLabel.HOTP_KEY_LABEL.getCode();
-		if (otpLabel.toLowerCase().equals(ApproveSDKConstants.TOTP_KEY)) {
+		if (otpLabel.equalsIgnoreCase(ApproveSDKConstants.HID_TOTP_KEY)) {
 			label = OtpKeyLabel.TOTP_KEY_LABEL.getCode();
 		}
 		generateOTPWrap(activity, password, isBiometricEnabled, otpSuccessCallback, otpFailureCallback, label);
@@ -442,7 +438,7 @@ public class ApproveSDKWrapper {
 		OTPGeneratorSync generate;
 		try {
 			getPasswordPolicy(appContext);
-			String lockPolicyType = getLockPolicy(otpLabel, ApproveSDKConstants.CODE_SECURE);
+			String lockPolicyType = getLockPolicy(otpLabel, ApproveSDKConstants.HID_CODE_SECURE);
 			Log.d(LOG_TAG, "HID:generateOTP - lockPolicyType: " + lockPolicyType);
 			generate = new OTPGeneratorSync(activity, password, isBiometricEnabled, otpSuccessCallback,
 					otpFailureCallback, getSingleUserContainer(), otpLabel);
@@ -451,19 +447,14 @@ public class ApproveSDKWrapper {
 				generate.setBiometricEventListener(new BiometricEventListener() {
 					@Override
 					public void onAuthSuccess() {
-//						Thread thread = new Thread(generate);
-//						thread.start();
 					}
 
 					@Override
 					public void onAuthFailed() {
-
 					}
 
 					@Override
 					public void onAuthError() {
-						// TODO Auto-generated method stub
-
 					}
 				});
 			}
@@ -485,12 +476,15 @@ public class ApproveSDKWrapper {
 	 * 
 	 */
 	public void enableBioMetrics(String password, Function bioStatusCallback) {
-		this.container = getSingleUserContainer();
+		Container singleContainer = getSingleUserContainer();
+		if (singleContainer == null) {
+	        throw new IllegalArgumentException("HID:enableBioMetrics Container must not be null.");
+	    }
 		boolean state = BiometricUtils.isDeviceFingerPrintEnrolled(appContext);
 		if (state) {
 			Log.d(LOG_TAG, "HID:enableBioMetrics FingerPrint Enrolled");
 			try {
-				ProtectionPolicy policy = this.container.getProtectionPolicy();
+				ProtectionPolicy policy = singleContainer.getProtectionPolicy();
 				BioPasswordPolicy bioPasswordPolicy = (BioPasswordPolicy) policy;
 				if (bioPasswordPolicy != null) {
 					if (password == null) {
@@ -516,29 +510,29 @@ public class ApproveSDKWrapper {
 				executeBioStatusCallback(bioStatusCallback, false, "PIN is incorrect");
 				Log.d(LOG_TAG, "HID:enableBioMetrics: AuthenticationException" + e.getStackTrace());
 			} catch (UnsupportedDeviceException e) {
-				executeBioStatusCallback(bioStatusCallback, false, "UnsupportedDeviceException");
+				executeBioStatusCallback(bioStatusCallback, false, ApproveSDKConstants.HID_UNSUPPORTED_DEVICE_EXCEPTION);
 				Log.d(LOG_TAG, "HID:enableBioMetrics: UnsupportedDeviceException" + e.getStackTrace());
 			} catch (InternalException e) {
-				executeBioStatusCallback(bioStatusCallback, false, "InternalException");
+				executeBioStatusCallback(bioStatusCallback, false, ApproveSDKConstants.HID_INTERNAL_EXCEPTION);
 				Log.d(LOG_TAG, "HID:enableBioMetrics: InternalException" + e.getStackTrace());
 			} catch (LostCredentialsException e) {
-				executeBioStatusCallback(bioStatusCallback, false, "LostCredentialsException");
+				executeBioStatusCallback(bioStatusCallback, false, ApproveSDKConstants.HID_LOST_CREDENTIALS_EXCEPTION);
 				Log.d(LOG_TAG, "HID:enableBioMetrics: LostCredentialsException" + e.getStackTrace());
 			} catch (FingerprintNotEnrolledException e) {
-				executeBioStatusCallback(bioStatusCallback, false, "FingerprintNotEnrolledException");
+				executeBioStatusCallback(bioStatusCallback, false, ApproveSDKConstants.HID_FINGERPRINT_NOT_ENROLLED_EXCEPTION);
 				Log.d(LOG_TAG, "HID:enableBioMetrics: FingerprintNotEnrolledException" + e.getStackTrace());
 			} catch (FingerprintAuthenticationRequiredException e) {
-				executeBioStatusCallback(bioStatusCallback, false, "FingerprintAuthenticationRequiredException");
+				executeBioStatusCallback(bioStatusCallback, false, ApproveSDKConstants.HID_FINGERPRINT_AUTHENTICATION_REQUIRED_EXCEPTION);
 				Log.d(LOG_TAG, "HID:enableBioMetrics: FingerprintAuthenticationRequiredException" + e.getStackTrace());
 			} catch (PasswordExpiredException e) {
-				executeBioStatusCallback(bioStatusCallback, false, "PasswordExpiredException");
+				executeBioStatusCallback(bioStatusCallback, false, ApproveSDKConstants.HID_PASSWORD_EXPIRED_EXCEPTION);
 				Log.d(LOG_TAG, "HID:enableBioMetrics: PasswordExpiredException" + e.getStackTrace());
-			} catch (Throwable t) {
-				Log.e(LOG_TAG, "HID:enableBioMetrics: Exception" + t.getStackTrace());
+			} catch (Exception e) {
+				Log.e(LOG_TAG, "HID:enableBioMetrics: Exception" + e.getStackTrace());
 				boolean isEnabled = false;
 				String message = "Biometric enrollment got failed";
 				executeBioStatusCallback(bioStatusCallback, isEnabled, message);
-				t.printStackTrace();
+				e.printStackTrace();
 			}
 		} else {
 			executeBioStatusCallback(bioStatusCallback, false, "Device does not support biometric");
@@ -558,7 +552,15 @@ public class ApproveSDKWrapper {
 				Log.d(LOG_TAG, "HID:checkForBioAvailability Fingerprint Not enrolled");
 				return false;
 			}
-			ProtectionPolicy policy = getSingleUserContainer().getProtectionPolicy();
+			Container singleContainer = getSingleUserContainer();
+			if (singleContainer == null) {
+				throw new IllegalArgumentException("HID:checkForBioAvailability Container must not be null.");
+			}
+			ProtectionPolicy policy = singleContainer.getProtectionPolicy();
+			if (policy == null) {
+				Log.d(LOG_TAG, "HID:checkForBioAvailability Protection Policy is null");
+				return false;
+			}
 			BioPasswordPolicy bioPasswordPolicy = (BioPasswordPolicy) policy;
 			if (!(policy.getType().equals(ProtectionPolicy.PolicyType.BIOPASSWORD.name()))) {
 				Log.d(LOG_TAG, "HID:checkForBioAvailability Bio Policy Not present");
@@ -593,9 +595,9 @@ public class ApproveSDKWrapper {
 		} catch (LostCredentialsException e) {
 			Log.d(LOG_TAG, "HID:checkForBioAvailability: LostCredentialsException" + e.getStackTrace());
 			e.printStackTrace();
-		} catch (Throwable t) {
-			Log.d(LOG_TAG, "HID:checkForBioAvailability: Exception" + t.getStackTrace());
-			t.printStackTrace();
+		} catch (Exception e) {
+			Log.d(LOG_TAG, "HID:checkForBioAvailability: Exception" + e.getStackTrace());
+			e.printStackTrace();
 		}
 		return false;
 	}
@@ -614,7 +616,11 @@ public class ApproveSDKWrapper {
 				Log.d(LOG_TAG, "HID:checkForBioAvailability Fingerprint Not enrolled");
 				return false;
 			}
-			ProtectionPolicy policy = getSingleUserContainer().getProtectionPolicy();
+			Container singleContainer = getSingleUserContainer();
+			if (singleContainer == null) {
+				throw new IllegalArgumentException("HID:checkForBioAvailability Container must not be null.");
+			}
+			ProtectionPolicy policy = singleContainer.getProtectionPolicy();
 			BioPasswordPolicy bioPasswordPolicy = (BioPasswordPolicy) policy;
 			if (!(policy.getType().equals(ProtectionPolicy.PolicyType.BIOPASSWORD.name()))) {
 				Log.d(LOG_TAG, "HID:checkForBioAvailability Bio Policy Not present");
@@ -651,9 +657,9 @@ public class ApproveSDKWrapper {
 		} catch (LostCredentialsException e) {
 			Log.d(LOG_TAG, "HID:checkForBioAvailability: LostCredentialsException " + e.getStackTrace());
 			e.printStackTrace();
-		} catch (Throwable t) {
-			Log.d(LOG_TAG, "HID:checkForBioAvailability: Exception " + t.getStackTrace());
-			t.printStackTrace();
+		} catch (Exception e) {
+			Log.d(LOG_TAG, "HID:checkForBioAvailability: Exception " + e.getStackTrace());
+			e.printStackTrace();
 		}
 		return false;
 	}
@@ -663,9 +669,12 @@ public class ApproveSDKWrapper {
 	 * 
 	 */
 	public void disableBioMetrics() {
-		this.container = getSingleUserContainer();
+		Container singleContainer = getSingleUserContainer();
 		try {
-			ProtectionPolicy policy = this.container.getProtectionPolicy();
+			if (singleContainer == null) {
+		        throw new IllegalArgumentException("HID:disableBioMetrics Container must not be null.");
+		    }
+			ProtectionPolicy policy = singleContainer.getProtectionPolicy();
 			BioPasswordPolicy bioPasswordPolicy = (BioPasswordPolicy) policy;
 			if (bioPasswordPolicy != null) {
 				bioPasswordPolicy.disableBioAuthentication();
@@ -693,9 +702,9 @@ public class ApproveSDKWrapper {
 		} catch (PasswordExpiredException e) {
 			Log.d(LOG_TAG, "HID:disableBioMetrics: PasswordExpiredException " + e.getStackTrace());
 			e.printStackTrace();
-		} catch (Throwable t) {
-			Log.d(LOG_TAG, "HID:disableBioMetrics: Exception " + t.getStackTrace());
-			t.printStackTrace();
+		} catch (Exception e) {
+			Log.d(LOG_TAG, "HID:disableBioMetrics: Exception " + e.getStackTrace());
+			e.printStackTrace();
 		}
 	}
 
@@ -703,27 +712,27 @@ public class ApproveSDKWrapper {
 	 * This private method is used to check the multi user bio status.
 	 * 
 	 * @return boolean indicating whether the device is multi user or not.
-	 */
+	 
 	private boolean checkMultiUserBioStatus() {
 		Device device;
 		try {
 			device = DeviceFactory.getDevice(appContext, new ConnectionConfiguration());
 			Container[] containers = device.findContainers(new Parameter[0]);
-			for (Container container : containers) {
-				ProtectionPolicy policy = container.getProtectionPolicy();
+			for (Container singleContainer : containers) {
+				ProtectionPolicy policy = singleContainer.getProtectionPolicy();
 				BioPasswordPolicy bioPasswordPolicy = (BioPasswordPolicy) policy;
 				if (bioPasswordPolicy.getBioAuthenticationState().equals(BioAuthenticationState.ENABLED)) {
 					return true;
 				}
 			}
-		} catch (Throwable t) {
-			// TODO Auto-generated catch block
-			t.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
 			return false;
 		}
 
 		return false;
 	}
+	*/
 
 	/**
 	 * This private method is used to execute a bio status callback with parameters.
@@ -739,9 +748,9 @@ public class ApproveSDKWrapper {
 		obj[1] = message;
 		try {
 			bioStatusCallback.execute(obj);
-		} catch (Throwable t) {
-			Log.e(LOG_TAG, "HID:executeBioStatusCallback Exception in executeBioStatusCallback " + t.getStackTrace());
-			t.printStackTrace();
+		} catch (Exception e) {
+			Log.e(LOG_TAG, "HID:executeBioStatusCallback Exception in executeBioStatusCallback " + e.getStackTrace());
+			e.printStackTrace();
 		}
 	}
 
@@ -754,14 +763,14 @@ public class ApproveSDKWrapper {
 		Parameter[] filter = this.username != null && !this.username.isEmpty()
 				? new Parameter[] { new Parameter(SDKConstants.CONTAINER_USERID, this.username.toCharArray()) }
 				: new Parameter[0];
-		Container container = null;
+		Container singleContainer = null;
 		try {
 			Device device = DeviceFactory.getDevice(appContext, new ConnectionConfiguration());
 			Container[] containers = device.findContainers(filter);
-			Log.d("ApproveSDKWrapper", "HID:getSingleUserContainer - container: " + containers.toString());
-		    Log.d("ApproveSDKWrapper", "HID:getSingleUserContainer - containers length: " + containers.length);
-		    Log.d("ApproveSDKWrapper", "HID:getSingleUserContainer - containers[0] userId: " + containers[0].getUserId());
-			container = containers[0];
+			Log.d(LOG_TAG, "HID:getSingleUserContainer - container: " + Arrays.toString(containers));
+		    Log.d(LOG_TAG, "HID:getSingleUserContainer - containers length: " + containers.length);
+		    Log.d(LOG_TAG, "HID:getSingleUserContainer - containers[0] userId: " + containers[0].getUserId());
+		    singleContainer = containers[0];
 		} catch (InternalException t) {
 			Log.e(LOG_TAG, "HID:getSingleUserContainer InternalException " + t.getStackTrace());
 			t.printStackTrace();
@@ -771,11 +780,11 @@ public class ApproveSDKWrapper {
 		} catch (InvalidParameterException t) {
 			Log.e(LOG_TAG, "HID:getSingleUserContainer InvalidParameterException " + t.getStackTrace());
 			t.printStackTrace();
-		} catch (Throwable t) {
-			Log.e(LOG_TAG, "HID:getSingleUserContainer Exception " + t.getStackTrace());
-			t.printStackTrace();
+		} catch (Exception e) {
+			Log.e(LOG_TAG, "HID:getSingleUserContainer Exception " + e.getStackTrace());
+			e.printStackTrace();
 		}
-		return container;
+		return singleContainer;
 	}
 
 	/**
@@ -817,21 +826,21 @@ public class ApproveSDKWrapper {
 	 * 
 	 * @param transactionDetails  - Details of the transaction to be signed.
 	 * @param pwdPromptCallback   - Callback function to prompt for password.
-	 * @param sCB_signTransacion  - Callback function for successful response.
-	 * @param fCB_signTransaction - Callback function for failed response.
+	 * @param sCBsignTransacion  - Callback function for successful response.
+	 * @param fCBsignTransaction - Callback function for failed response.
 	 * @param appContext          - Context of the application.
 	 * @param activity            - FragmentActivity to run the transaction signing
 	 *                            in.
 	 * @param otpLabel            - The label for the OTP key, can be "HOTP" or
 	 *                            "TOTP".
 	 */
-	public void signTransaction(String transactionDetails, Function pwdPromptCallback, Function sCB_signTransacion,
-			Function fCB_signTransaction, Context appContext, FragmentActivity activity, String otpLabel) {
+	public void signTransaction(String transactionDetails, Function pwdPromptCallback, Function sCBsignTransacion,
+			Function fCBsignTransaction, Context appContext, FragmentActivity activity, String otpLabel) {
 		String label = OtpKeyLabel.OATH_OCRA_HOTP_SIGN_LABEL.getCode();
-		if (otpLabel.toLowerCase().equals(ApproveSDKConstants.TOTP_KEY)) {
+		if (otpLabel.equalsIgnoreCase(ApproveSDKConstants.HID_TOTP_KEY)) {
 			label = OtpKeyLabel.OATH_OCRA_TOTP_SIGN_LABEL.getCode();
 		}
-		signTransactionWrap(transactionDetails, pwdPromptCallback, sCB_signTransacion, fCB_signTransaction, appContext,
+		signTransactionWrap(transactionDetails, pwdPromptCallback, sCBsignTransacion, fCBsignTransaction, appContext,
 				activity, label);
 	}
 
@@ -841,15 +850,15 @@ public class ApproveSDKWrapper {
 	 * 
 	 * @param transactionDetails  - Details of the transaction to be signed.
 	 * @param pwdPromptCallback   - Callback function to prompt for password.
-	 * @param sCB_signTransacion  - Callback function for successful response.
-	 * @param fCB_signTransaction - Callback function for failed response.
+	 * @param sCBsignTransacion  - Callback function for successful response.
+	 * @param fCBsignTransaction - Callback function for failed response.
 	 * @param appContext          - Context of the application.
 	 * @param activity            - FragmentActivity to run the transaction signing
 	 *                            in.
 	 */
-	public void signTransaction(String transactionDetails, Function pwdPromptCallback, Function sCB_signTransacion,
-			Function fCB_signTransaction, Context appContext, FragmentActivity activity) {
-		signTransactionWrap(transactionDetails, pwdPromptCallback, sCB_signTransacion, fCB_signTransaction, appContext,
+	public void signTransaction(String transactionDetails, Function pwdPromptCallback, Function sCBsignTransacion,
+			Function fCBsignTransaction, Context appContext, FragmentActivity activity) {
+		signTransactionWrap(transactionDetails, pwdPromptCallback, sCBsignTransacion, fCBsignTransaction, appContext,
 				activity, OtpKeyLabel.OATH_OCRA_HOTP_SIGN_LABEL.getCode());
 	}
 
@@ -858,24 +867,24 @@ public class ApproveSDKWrapper {
 	 * 
 	 * @param transactionDetails  - Details of the transaction to be signed.
 	 * @param pwdPromptCallback   - Callback function to prompt for password.
-	 * @param sCB_signTransacion  - Callback function for successful response.
-	 * @param fCB_signTransaction - Callback function for failed response.
+	 * @param sCBsignTransacion  - Callback function for successful response.
+	 * @param fCBsignTransaction - Callback function for failed response.
 	 * @param appContext          - Context of the application.
 	 * @param activity            - FragmentActivity to run the transaction signing
 	 *                            in.
 	 * @param otpLabel            - The label for the OTP key will be set in
 	 *                            accordance with TOTP or HOTP.
 	 */
-	private void signTransactionWrap(String transactionDetails, Function pwdPromptCallback, Function sCB_signTransacion,
-			Function fCB_signTransaction, Context appContext, FragmentActivity activity, String otpLabel) {
+	private void signTransactionWrap(String transactionDetails, Function pwdPromptCallback, Function sCBsignTransacion,
+			Function fCBsignTransaction, Context appContext, FragmentActivity activity, String otpLabel) {
 		this.activity = activity;
 		this.appContext = appContext;
 		boolean isBioEnabled = checkForBioAvailability();
-		String lockPolicyType = getLockPolicy(otpLabel, ApproveSDKConstants.CODE_SIGN);
+		String lockPolicyType = getLockPolicy(otpLabel, ApproveSDKConstants.HID_CODE_SIGN);
 		Log.d(LOG_TAG, "HID:signTransaction - lockPolicyType: " + lockPolicyType);
 		signTransactionMonitor = new WaitNotifyMonitor();
 		SignatureGeneratorAsync signatureGeneratorAsync = new SignatureGeneratorAsync(transactionDetails,
-				getSingleUserContainer(), isBioEnabled, pwdPromptCallback, sCB_signTransacion, fCB_signTransaction,
+				getSingleUserContainer(), isBioEnabled, pwdPromptCallback, sCBsignTransacion, fCBsignTransaction,
 				appContext, activity, signTransactionMonitor, otpLabel);
 		Thread thread = new Thread(signatureGeneratorAsync);
 		thread.start();
@@ -907,69 +916,69 @@ public class ApproveSDKWrapper {
 			ServerActionInfo transactionInfo = device.retrieveActionInfo(txId.toCharArray());
 			ProtectionPolicy policy = transactionInfo.getProtectionKey().getProtectionPolicy();
 			Log.d(LOG_TAG, policy.getType());
-			String username = transactionInfo.getContainer().getUserId();
-			this.username = username;
+			String usernameRT = transactionInfo.getContainer().getUserId();
+			this.username = usernameRT;
 
 			Transaction transaction = (Transaction) transactionInfo.getAction(null, new Parameter[0]);
 			String transactionString = transaction.toString();
 			container = transactionInfo.getContainer();
 			if (transactionString == null || transactionString.isEmpty()) {
 				Log.d(LOG_TAG, "HID:retriveTransaction: Transaction is empty");
-				callback.execute(new Object[] { "error", "Transaction is empty", null });
+				callback.execute(new Object[] { ApproveSDKConstants.HID_ERROR_MESSAGE, "Transaction is empty", null });
 				return null;
 			}
 
-			jsonObj.put("username", username);
+			jsonObj.put("username", usernameRT);
 			jsonObj.put("tds", transactionString);
 			Log.d(LOG_TAG, "HID:retriveTransaction: Transaction retreival complete");
-			callback.execute(new Object[] { "success", "No Exception", jsonObj });
+			callback.execute(new Object[] { ApproveSDKConstants.HID_SUCCESS_MESSAGE, ApproveSDKConstants.HID_NO_EXCEPTION, jsonObj });
 		} catch (InternalException e) {
 			e.printStackTrace();
-			callback.execute(new Object[] { "error", "InternalException", e.getMessage() });
+			callback.execute(new Object[] { ApproveSDKConstants.HID_ERROR_MESSAGE, ApproveSDKConstants.HID_INTERNAL_EXCEPTION, e.getMessage() });
 			Log.d(LOG_TAG, "HID:retriveTransaction: InternalException " + e.getStackTrace());
 		} catch (InvalidParameterException e) {
 			e.printStackTrace();
-			callback.execute(new Object[] { "error", "InvalidParameterException", e.getMessage() });
+			callback.execute(new Object[] { ApproveSDKConstants.HID_ERROR_MESSAGE, ApproveSDKConstants.HID_INVALID_PARAMETER_EXCEPTION, e.getMessage() });
 			Log.d(LOG_TAG, "HID:retriveTransaction: InvalidParameterException " + e.getStackTrace());
 		} catch (UnsupportedDeviceException e) {
 			e.printStackTrace();
-			callback.execute(new Object[] { "error", "UnsupportedDeviceException", e.getMessage() });
+			callback.execute(new Object[] { ApproveSDKConstants.HID_ERROR_MESSAGE, ApproveSDKConstants.HID_UNSUPPORTED_DEVICE_EXCEPTION, e.getMessage() });
 			Log.d(LOG_TAG, "HID:retriveTransaction: UnsupportedDeviceException" + e.getStackTrace());
 		} catch (LostCredentialsException e) {
 			e.printStackTrace();
-			callback.execute(new Object[] { "error", "LostCredentialsException", e.getMessage() });
+			callback.execute(new Object[] { ApproveSDKConstants.HID_ERROR_MESSAGE, ApproveSDKConstants.HID_LOST_CREDENTIALS_EXCEPTION, e.getMessage() });
 			Log.d(LOG_TAG, "HID:retriveTransaction: LostCredentialsException " + e.getStackTrace());
 		} catch (InvalidContainerException e) {
 			e.printStackTrace();
-			callback.execute(new Object[] { "error", "InvalidContainerException", e.getMessage() });
+			callback.execute(new Object[] { ApproveSDKConstants.HID_ERROR_MESSAGE, ApproveSDKConstants.HID_INAVLID_CONTAINER_EXCEPTION, e.getMessage() });
 			Log.d(LOG_TAG, "HID:retriveTransaction: InvalidContainerException " + e.getStackTrace());
 		} catch (InexplicitContainerException e) {
 			e.printStackTrace();
-			callback.execute(new Object[] { "error", "InexplicitContainerException", e.getMessage() });
+			callback.execute(new Object[] { ApproveSDKConstants.HID_ERROR_MESSAGE, ApproveSDKConstants.HID_INEXPLICIT_CONTAINER_EXCEPTION, e.getMessage() });
 			Log.d(LOG_TAG, "HID:retriveTransaction: InexplicitContainerException " + e.getStackTrace());
 		} catch (AuthenticationException e) {
 			e.printStackTrace();
-			callback.execute(new Object[] { "error", "AuthenticationException", e.getMessage() });
+			callback.execute(new Object[] { ApproveSDKConstants.HID_ERROR_MESSAGE, ApproveSDKConstants.HID_AUTHENTICATION_EXCEPTION, e.getMessage() });
 			Log.d(LOG_TAG, "HID:retriveTransaction: AuthenticationException " + e.getStackTrace());
 		} catch (RemoteException e) {
 			e.printStackTrace();
-			callback.execute(new Object[] { "error", "RemoteException", e.getMessage() });
+			callback.execute(new Object[] { ApproveSDKConstants.HID_ERROR_MESSAGE, ApproveSDKConstants.HID_REMOTE_EXCEPTION, e.getMessage() });
 			Log.d(LOG_TAG, "HID:retriveTransaction: RemoteException " + e.getStackTrace());
 		} catch (PasswordExpiredException e) {
 			e.printStackTrace();
-			callback.execute(new Object[] { "error", "PasswordExpiredException", e.getMessage() });
+			callback.execute(new Object[] { ApproveSDKConstants.HID_ERROR_MESSAGE, ApproveSDKConstants.HID_PASSWORD_EXPIRED_EXCEPTION, e.getMessage() });
 			Log.d(LOG_TAG, "HID:retriveTransaction: PasswordExpiredException " + e.getStackTrace());
 		} catch (TransactionExpiredException e) {
 			e.printStackTrace();
-			callback.execute(new Object[] { "error", "TransactionExpiredException", e.getMessage() });
+			callback.execute(new Object[] { ApproveSDKConstants.HID_ERROR_MESSAGE, ApproveSDKConstants.HID_TRANSACTION_EXPIRED_EXCEPTION, e.getMessage() });
 			Log.d(LOG_TAG, "HID:retriveTransaction: TransactionExpiredException " + e.getStackTrace());
 		} catch (ServerOperationFailedException e) {
 			e.printStackTrace();
-			callback.execute(new Object[] { "error", "ServerOperationFailedException", e.getMessage() });
+			callback.execute(new Object[] { ApproveSDKConstants.HID_ERROR_MESSAGE, ApproveSDKConstants.HID_SERVER_OPERATION_FAILED_EXCEPTION, e.getMessage() });
 			Log.d(LOG_TAG, "HID:retriveTransaction: ServerOperationFailedException " + e.getStackTrace());
 		} catch (Exception e) {
 			e.printStackTrace();
-			callback.execute(new Object[] { "error", "Exception", e.getMessage() });
+			callback.execute(new Object[] { ApproveSDKConstants.HID_ERROR_MESSAGE, ApproveSDKConstants.HID_GENERIC_EXCEPTION, e.getMessage() });
 			Log.d(LOG_TAG, "HID:retriveTransaction: Exception " + e.getStackTrace());
 		}
 		return jsonObj.toString();
@@ -994,34 +1003,35 @@ public class ApproveSDKWrapper {
 		this.appContext = appContext;
 		this.activity = activity;
 		Log.d(LOG_TAG, "Inside Verify password with bioEnabled = " + isBiometricEnabled);
-		Container container = this.getSingleUserContainer();
+		Container singleContainer = this.getSingleUserContainer();
 		if (!isBiometricEnabled && (password == null || password.isEmpty())) {
-			genericExecuteCallback(new Object[] { "error", ApproveSDKConstants.AUTHENTICATION_EXCEPTION,
-					ApproveSDKConstants.AUTH_EXCEPTION_CODE }, callback);
+			genericExecuteCallback(new Object[] { ApproveSDKConstants.HID_ERROR_MESSAGE, ApproveSDKConstants.HID_AUTHENTICATION_EXCEPTION,
+					ApproveSDKConstants.HID_AUTH_EXCEPTION_CODE }, callback);
 			Log.d(LOG_TAG, "HID:verifyPassword Password is null or empty");
 		}
 		try {
-			PasswordPolicy passwordPolicy = (PasswordPolicy) container.getProtectionPolicy();
+			if (singleContainer == null) {
+		        throw new IllegalArgumentException("HID:verifyPassword Container must not be null.");
+		    }
+			PasswordPolicy passwordPolicy = (PasswordPolicy) singleContainer.getProtectionPolicy();
 			if (isBiometricEnabled) {
 				BiometricAuthService bioAuthService = new BiometricAuthService();
-				bioAuthService.setBiometricPrompt(activity, bioString, container.getProtectionPolicy(),
+				bioAuthService.setBiometricPrompt(activity, bioString, singleContainer.getProtectionPolicy(),
 						new FingerprintHandler.BiometricEventListener() {
 
 							@Override
 							public void onAuthSuccess() {
 								try {
-									PasswordPolicy passwordPolicy = (PasswordPolicy) container.getProtectionPolicy();
-									// passwordPolicy.verifyPassword(null);
+									PasswordPolicy passwordPolicy = (PasswordPolicy) singleContainer.getProtectionPolicy();
 								} catch (Exception e) {
-									genericExecuteCallback(new Object[] { "error", e.getClass().getName(),
-											ApproveSDKConstants.NO_EXCEPTION_CODE }, callback);
-									Log.d(LOG_TAG, "HID:verifyPassword: Exception " + e.getStackTrace());
+									genericExecuteCallback(new Object[] { ApproveSDKConstants.HID_ERROR_MESSAGE, e.getClass().getName(),
+											ApproveSDKConstants.HID_NO_EXCEPTION_CODE }, callback);
+									Log.d(LOG_TAG, "HID:verifyPassword: onAuthSuccess Exception " + e.getStackTrace());
 									e.printStackTrace();
 								}
-								genericExecuteCallback(new Object[] { "success", "No Exception",
-										ApproveSDKConstants.NO_EXCEPTION_CODE }, callback);
+								genericExecuteCallback(new Object[] { ApproveSDKConstants.HID_SUCCESS_MESSAGE, "No Exception",
+										ApproveSDKConstants.HID_NO_EXCEPTION_CODE }, callback);								
 								Log.d(LOG_TAG, "HID:verifyPassword: Success");
-
 							}
 
 							@Override
@@ -1037,128 +1047,128 @@ public class ApproveSDKWrapper {
 				try {
 					passwordPolicy.verifyPassword(null);
 				} catch (FingerprintAuthenticationRequiredException fe) {
-					genericExecuteCallback(new Object[] { "error", ApproveSDKConstants.BIOMETRIC_ERROR,
-							ApproveSDKConstants.BIOMETRIC_ERROR_CODE }, callback);
+					genericExecuteCallback(new Object[] { ApproveSDKConstants.HID_ERROR_MESSAGE, ApproveSDKConstants.HID_BIOMETRIC_ERROR,
+							ApproveSDKConstants.HID_BIOMETRIC_ERROR_CODE }, callback);
 					Log.d(LOG_TAG,
 							"HID:verifyPassword: FingerprintAuthenticationRequiredException " + fe.getStackTrace());
 					fe.printStackTrace();
 				} catch (InternalException e) {
 					genericExecuteCallback(
-							new Object[] { "error", "InternalException", ApproveSDKConstants.GENERIC_ERROR_CODE },
+							new Object[] { ApproveSDKConstants.HID_ERROR_MESSAGE, ApproveSDKConstants.HID_INTERNAL_EXCEPTION, ApproveSDKConstants.HID_GENERIC_ERROR_CODE },
 							callback);
-					Log.d(LOG_TAG, "HID:verifyPassword: InternalException " + e.getStackTrace());
+					Log.d(LOG_TAG, "HID:verifyPassword: InternalException" + e.getStackTrace());
 					e.printStackTrace();
 				} catch (UnsupportedDeviceException e) {
-					genericExecuteCallback(new Object[] { "error", "UnsupportedDeviceException",
-							ApproveSDKConstants.GENERIC_ERROR_CODE }, callback);
-					Log.d(LOG_TAG, "HID:verifyPassword: UnsupportedDeviceException " + e.getStackTrace());
+					genericExecuteCallback(new Object[] { ApproveSDKConstants.HID_ERROR_MESSAGE, ApproveSDKConstants.HID_UNSUPPORTED_DEVICE_EXCEPTION,
+							ApproveSDKConstants.HID_GENERIC_ERROR_CODE }, callback);
+					Log.d(LOG_TAG, "HID:verifyPassword: UnsupportedDeviceException" + e.getStackTrace());
 					e.printStackTrace();
 				} catch (LostCredentialsException e) {
-					genericExecuteCallback(new Object[] { "error", "LostCredentialsException",
-							ApproveSDKConstants.GENERIC_ERROR_CODE }, callback);
-					Log.d(LOG_TAG, "HID:verifyPassword: LostCredentialsException " + e.getStackTrace());
+					genericExecuteCallback(new Object[] { ApproveSDKConstants.HID_ERROR_MESSAGE, ApproveSDKConstants.HID_LOST_CREDENTIALS_EXCEPTION,
+							ApproveSDKConstants.HID_GENERIC_ERROR_CODE }, callback);
+					Log.d(LOG_TAG, "HID:verifyPassword: LostCredentialsException" + e.getStackTrace());
 					e.printStackTrace();
 				} catch (AuthenticationException e) {
 					genericExecuteCallback(
-							new Object[] { "error", "AuthenticationException", ApproveSDKConstants.GENERIC_ERROR_CODE },
+							new Object[] { ApproveSDKConstants.HID_ERROR_MESSAGE, ApproveSDKConstants.HID_AUTHENTICATION_EXCEPTION, ApproveSDKConstants.HID_GENERIC_ERROR_CODE },
 							callback);
 					Log.d(LOG_TAG, "HID:verifyPassword: AuthenticationException " + e.getStackTrace());
 					e.printStackTrace();
 				} catch (PasswordExpiredException e) {
-					genericExecuteCallback(new Object[] { "error", "PasswordExpiredException",
-							ApproveSDKConstants.GENERIC_ERROR_CODE }, callback);
+					genericExecuteCallback(new Object[] { ApproveSDKConstants.HID_ERROR_MESSAGE, ApproveSDKConstants.HID_PASSWORD_EXPIRED_EXCEPTION,
+							ApproveSDKConstants.HID_GENERIC_ERROR_CODE }, callback);
 					Log.d(LOG_TAG, "HID:verifyPassword: PasswordExpiredException " + e.getStackTrace());
 					e.printStackTrace();
 				} catch (FingerprintNotEnrolledException e) {
-					genericExecuteCallback(new Object[] { "error", "FingerprintNotEnrolledException",
-							ApproveSDKConstants.GENERIC_ERROR_CODE }, callback);
+					genericExecuteCallback(new Object[] { ApproveSDKConstants.HID_ERROR_MESSAGE, ApproveSDKConstants.HID_FINGERPRINT_NOT_ENROLLED_EXCEPTION,
+							ApproveSDKConstants.HID_GENERIC_ERROR_CODE }, callback);
 					Log.d(LOG_TAG, "HID:verifyPassword: FingerprintNotEnrolledException " + e.getStackTrace());
 					e.printStackTrace();
 				} catch (PasswordRequiredException e) {
-					genericExecuteCallback(new Object[] { "error", "PasswordRequiredException",
-							ApproveSDKConstants.GENERIC_ERROR_CODE }, callback);
+					genericExecuteCallback(new Object[] { ApproveSDKConstants.HID_ERROR_MESSAGE, ApproveSDKConstants.HID_PASSWORD_REQUIRED_EXCEPTION,
+							ApproveSDKConstants.HID_GENERIC_ERROR_CODE }, callback);
 					Log.d(LOG_TAG, "HID:verifyPassword: PasswordRequiredException " + e.getStackTrace());
 					e.printStackTrace();
 				} catch (InvalidParameterException e) {
-					genericExecuteCallback(new Object[] { "error", "InvalidParameterException",
-							ApproveSDKConstants.GENERIC_ERROR_CODE }, callback);
+					genericExecuteCallback(new Object[] { ApproveSDKConstants.HID_ERROR_MESSAGE, ApproveSDKConstants.HID_INVALID_PARAMETER_EXCEPTION,
+							ApproveSDKConstants.HID_GENERIC_ERROR_CODE }, callback);
 					Log.d(LOG_TAG, "HID:verifyPassword: InvalidParameterException " + e.getStackTrace());
 					e.printStackTrace();
 				} catch (Exception e) {
-					genericExecuteCallback(new Object[] { "error", ApproveSDKConstants.BIOMETRIC_ERROR,
-							ApproveSDKConstants.BIOMETRIC_ERROR_CODE }, callback);
-					Log.d(LOG_TAG, "HID:verifyPassword: Exception " + e.getStackTrace());
+					genericExecuteCallback(new Object[] { ApproveSDKConstants.HID_ERROR_MESSAGE, ApproveSDKConstants.HID_BIOMETRIC_ERROR,
+							ApproveSDKConstants.HID_BIOMETRIC_ERROR_CODE }, callback);
+					Log.d(LOG_TAG, "HID:verifyPassword: Generic Exception " + e.getStackTrace());
 					e.printStackTrace();
 				}
 			} else {
 				try {
 					passwordPolicy.verifyPassword(password.toCharArray());
-					genericExecuteCallback(new Object[] { "success", "No Exception" }, callback);
+					genericExecuteCallback(new Object[] { ApproveSDKConstants.HID_SUCCESS_MESSAGE, "No Exception" }, callback);
 					Log.d(LOG_TAG, "HID:verifyPassword: Success");
-				} catch (AuthenticationException Ae) {
-					genericExecuteCallback(new Object[] { "error", ApproveSDKConstants.AUTHENTICATION_EXCEPTION,
-							ApproveSDKConstants.AUTH_EXCEPTION_CODE }, callback);
-					Log.d(LOG_TAG, "HID:verifyPassword: AuthenticationException " + Ae.getStackTrace());
+				} catch (AuthenticationException ae) {
+					genericExecuteCallback(new Object[] { ApproveSDKConstants.HID_ERROR_MESSAGE, ApproveSDKConstants.HID_AUTHENTICATION_EXCEPTION,
+							ApproveSDKConstants.HID_AUTH_EXCEPTION_CODE }, callback);
+					Log.d(LOG_TAG, "HID:verifyPassword: AuthenticationException " + ae.getStackTrace());
 				} catch (InternalException e) {
 					genericExecuteCallback(
-							new Object[] { "error", "InternalException", ApproveSDKConstants.GENERIC_ERROR_CODE },
+							new Object[] { ApproveSDKConstants.HID_ERROR_MESSAGE, ApproveSDKConstants.HID_INTERNAL_EXCEPTION, ApproveSDKConstants.HID_GENERIC_ERROR_CODE },
 							callback);
 					Log.d(LOG_TAG, "HID:verifyPassword: InternalException " + e.getStackTrace());
 					e.printStackTrace();
 				} catch (UnsupportedDeviceException e) {
-					genericExecuteCallback(new Object[] { "error", "UnsupportedDeviceException",
-							ApproveSDKConstants.GENERIC_ERROR_CODE }, callback);
+					genericExecuteCallback(new Object[] { ApproveSDKConstants.HID_ERROR_MESSAGE, ApproveSDKConstants.HID_UNSUPPORTED_DEVICE_EXCEPTION,
+							ApproveSDKConstants.HID_GENERIC_ERROR_CODE }, callback);
 					Log.d(LOG_TAG, "HID:verifyPassword: UnsupportedDeviceException " + e.getStackTrace());
 					e.printStackTrace();
 				} catch (LostCredentialsException e) {
-					genericExecuteCallback(new Object[] { "error", "LostCredentialsException",
-							ApproveSDKConstants.GENERIC_ERROR_CODE }, callback);
+					genericExecuteCallback(new Object[] { ApproveSDKConstants.HID_ERROR_MESSAGE, ApproveSDKConstants.HID_LOST_CREDENTIALS_EXCEPTION,
+							ApproveSDKConstants.HID_GENERIC_ERROR_CODE }, callback);
 					Log.d(LOG_TAG, "HID:verifyPassword: LostCredentialsException " + e.getStackTrace());
 					e.printStackTrace();
 				} catch (PasswordExpiredException e) {
-					genericExecuteCallback(new Object[] { "error", "PasswordExpiredException",
-							ApproveSDKConstants.GENERIC_ERROR_CODE }, callback);
+					genericExecuteCallback(new Object[] { ApproveSDKConstants.HID_ERROR_MESSAGE, ApproveSDKConstants.HID_PASSWORD_EXPIRED_EXCEPTION,
+							ApproveSDKConstants.HID_GENERIC_ERROR_CODE }, callback);
 					Log.d(LOG_TAG, "HID:verifyPassword: PasswordExpiredException " + e.getStackTrace());
 					e.printStackTrace();
 				} catch (FingerprintNotEnrolledException e) {
-					genericExecuteCallback(new Object[] { "error", "FingerprintNotEnrolledException",
-							ApproveSDKConstants.GENERIC_ERROR_CODE }, callback);
+					genericExecuteCallback(new Object[] { ApproveSDKConstants.HID_ERROR_MESSAGE, ApproveSDKConstants.HID_FINGERPRINT_NOT_ENROLLED_EXCEPTION,
+							ApproveSDKConstants.HID_GENERIC_ERROR_CODE }, callback);
 					Log.d(LOG_TAG, "HID:verifyPassword: FingerprintNotEnrolledException " + e.getStackTrace());
 					e.printStackTrace();
 				} catch (PasswordRequiredException e) {
-					genericExecuteCallback(new Object[] { "error", "PasswordRequiredException",
-							ApproveSDKConstants.GENERIC_ERROR_CODE }, callback);
+					genericExecuteCallback(new Object[] { ApproveSDKConstants.HID_ERROR_MESSAGE, ApproveSDKConstants.HID_PASSWORD_REQUIRED_EXCEPTION,
+							ApproveSDKConstants.HID_GENERIC_ERROR_CODE }, callback);
 					Log.d(LOG_TAG, "HID:verifyPassword: PasswordRequiredException " + e.getStackTrace());
 					e.printStackTrace();
 				} catch (InvalidParameterException e) {
-					genericExecuteCallback(new Object[] { "error", "InvalidParameterException",
-							ApproveSDKConstants.GENERIC_ERROR_CODE }, callback);
+					genericExecuteCallback(new Object[] { ApproveSDKConstants.HID_ERROR_MESSAGE, ApproveSDKConstants.HID_INVALID_PARAMETER_EXCEPTION,
+							ApproveSDKConstants.HID_GENERIC_ERROR_CODE }, callback);
 					Log.d(LOG_TAG, "HID:verifyPassword: InvalidParameterException " + e.getStackTrace());
 					e.printStackTrace();
 				} catch (Exception e) {
 					genericExecuteCallback(
-							new Object[] { "error", e.getClass().getName(), ApproveSDKConstants.NO_EXCEPTION_CODE },
+							new Object[] { ApproveSDKConstants.HID_ERROR_MESSAGE, e.getClass().getName(), ApproveSDKConstants.HID_NO_EXCEPTION_CODE },
 							callback);
 					Log.d(LOG_TAG, "HID:verifyPassword: Exception " + e.getStackTrace());
 				}
 			}
 		} catch (UnsupportedDeviceException e) {
 			genericExecuteCallback(
-					new Object[] { "error", "UnsupportedDeviceException", ApproveSDKConstants.GENERIC_ERROR_CODE },
+					new Object[] { ApproveSDKConstants.HID_ERROR_MESSAGE, ApproveSDKConstants.HID_UNSUPPORTED_DEVICE_EXCEPTION, ApproveSDKConstants.HID_GENERIC_ERROR_CODE },
 					callback);
 			Log.d(LOG_TAG, "HID:verifyPassword: UnsupportedDeviceException " + e.getStackTrace());
 		} catch (LostCredentialsException e) {
 			genericExecuteCallback(
-					new Object[] { "error", "LostCredentialsException", ApproveSDKConstants.GENERIC_ERROR_CODE },
+					new Object[] { ApproveSDKConstants.HID_ERROR_MESSAGE, ApproveSDKConstants.HID_LOST_CREDENTIALS_EXCEPTION, ApproveSDKConstants.HID_GENERIC_ERROR_CODE },
 					callback);
 			Log.d(LOG_TAG, "HID:verifyPassword: LostCredentialsException " + e.getStackTrace());
 		} catch (InternalException e) {
 			genericExecuteCallback(
-					new Object[] { "error", "InternalException", ApproveSDKConstants.GENERIC_ERROR_CODE }, callback);
+					new Object[] { ApproveSDKConstants.HID_ERROR_MESSAGE, ApproveSDKConstants.HID_INTERNAL_EXCEPTION, ApproveSDKConstants.HID_GENERIC_ERROR_CODE }, callback);
 			Log.d(LOG_TAG, "HID:verifyPassword: InternalException " + e.getStackTrace());
 		} catch (Exception e) {
 			genericExecuteCallback(
-					new Object[] { "error", e.getClass().getName(), ApproveSDKConstants.NO_EXCEPTION_CODE }, callback);
+					new Object[] { ApproveSDKConstants.HID_ERROR_MESSAGE, e.getClass().getName(), ApproveSDKConstants.HID_NO_EXCEPTION_CODE }, callback);
 			Log.d(LOG_TAG, "HID:verifyPassword: Exception " + e.getStackTrace());
 		}
 
@@ -1208,23 +1218,23 @@ public class ApproveSDKWrapper {
 			ServerActionInfo transactionInfo = device.retrieveActionInfo(txId.toCharArray());
 			ProtectionPolicy policy = transactionInfo.getProtectionKey().getProtectionPolicy();
 			Log.d(LOG_TAG, policy.getType());
-			String username = transactionInfo.getContainer().getUserId();
-			this.username = username;
+			String usernameTC = transactionInfo.getContainer().getUserId();
+			this.username = usernameTC;
 
 			Transaction transaction = (Transaction) transactionInfo.getAction(null, new Parameter[0]);
 			String transactionString = transaction.toString();
 			container = transactionInfo.getContainer();
 			if (transactionString == null || transactionString.isEmpty()) {
 				Log.d(LOG_TAG, "HID:transactionCancel: Transaction is empty");
-				genericExecuteCallback("error", "Transaction is empty", cancelCallback);
+				genericExecuteCallback(ApproveSDKConstants.HID_ERROR_MESSAGE, "Transaction is empty", cancelCallback);
 			}
 			if (container == null) {
 				Log.d(LOG_TAG, "HID:transactionCancel: Container is null");
-				genericExecuteCallback("error", "Container is null", cancelCallback);
+				genericExecuteCallback(ApproveSDKConstants.HID_ERROR_MESSAGE, "Container is null", cancelCallback);
 			}
 			if (reason == null || reason.isEmpty()) {
 				Log.d(LOG_TAG, "HID:transactionCancel: Reason is null or empty");
-				genericExecuteCallback("error", "Reason is null or empty", cancelCallback);
+				genericExecuteCallback(ApproveSDKConstants.HID_ERROR_MESSAGE, "Reason is null or empty", cancelCallback);
 			}
 			if (message == null || message.isEmpty()) {
 				Log.d(LOG_TAG, "HID:transactionCancel: Message is passed as null or empty");
@@ -1236,51 +1246,51 @@ public class ApproveSDKWrapper {
 			
 			if (reason.equals("cancel")) {
 				Log.d(LOG_TAG, "HID:transactionCancel: Cancelling transaction with reason: " + reason);
-				CancelationReason reasonCancel = ApproveSDKConstants.CANCELATION_REASON_CANCEL;
+				CancelationReason reasonCancel = ApproveSDKConstants.HID_CANCELATION_REASON_CANCEL;
 				transaction.cancel(message, reasonCancel , null);
 				Log.d(LOG_TAG, "HID:transactionCancel: Transaction cancelled successfully with reason: " + reason);
-				genericExecuteCallback("success", "Transaction cancelled successfully", cancelCallback);
+				genericExecuteCallback(ApproveSDKConstants.HID_SUCCESS_MESSAGE, "Transaction cancelled successfully", cancelCallback);
 			}else if (reason.equals("suspicious")) {
 				Log.d(LOG_TAG, "HID:transactionCancel: Cancelling transaction with reason: " + reason);
-				CancelationReason reasonSuspicious = ApproveSDKConstants.CANCELATION_REASON_SUSPICIOUS;
+				CancelationReason reasonSuspicious = ApproveSDKConstants.HID_CANCELATION_REASON_SUSPICIOUS;
 				transaction.cancel(message, reasonSuspicious, null);
 				Log.d(LOG_TAG, "HID:transactionCancel: Transaction marked as suspicious with reason: " + reason);
-				genericExecuteCallback("success", "Transaction marked as suspicious", cancelCallback);
+				genericExecuteCallback(ApproveSDKConstants.HID_SUCCESS_MESSAGE, "Transaction marked as suspicious", cancelCallback);
 			}else {
 				Log.d(LOG_TAG, "HID:transactionCancel: Invalid reason provided");
 				genericExecuteCallback("error", "Invalid reason provided", cancelCallback);
 			}
 		}catch(AuthenticationException e) {
 			Log.d(LOG_TAG, "HID:transactionCancel: AuthenticationException " + e.getStackTrace());
-			genericExecuteCallback("AuthenticationException", e.getMessage(), cancelCallback);
+			genericExecuteCallback(ApproveSDKConstants.HID_AUTHENTICATION_EXCEPTION, e.getMessage(), cancelCallback);
 			e.printStackTrace();
 		}catch (InternalException e) {
 			Log.d(LOG_TAG, "HID:transactionCancel: InternalException " + e.getStackTrace());
-			genericExecuteCallback("InternalException", e.getMessage(), cancelCallback);
+			genericExecuteCallback(ApproveSDKConstants.HID_INTERNAL_EXCEPTION, e.getMessage(), cancelCallback);
 			e.printStackTrace();
 		}catch (InvalidParameterException e) {
 			Log.d(LOG_TAG, "HID:transactionCancel: InvalidParameterException " + e.getStackTrace());
-			genericExecuteCallback("InvalidParameterException", e.getMessage(), cancelCallback);
+			genericExecuteCallback(ApproveSDKConstants.HID_INVALID_PARAMETER_EXCEPTION, e.getMessage(), cancelCallback);
 			e.printStackTrace();
 		}catch (PasswordExpiredException e) {
 			Log.d(LOG_TAG, "HID:transactionCancel: PasswordExpiredException " + e.getStackTrace());
-			genericExecuteCallback("PasswordExpiredException", e.getMessage(), cancelCallback);
+			genericExecuteCallback(ApproveSDKConstants.HID_PASSWORD_EXPIRED_EXCEPTION, e.getMessage(), cancelCallback);
 			e.printStackTrace();
 		}catch (RemoteException e) {
 			Log.d(LOG_TAG, "HID:transactionCancel: RemoteException " + e.getStackTrace());
-			genericExecuteCallback("RemoteException", e.getMessage(), cancelCallback);
+			genericExecuteCallback(ApproveSDKConstants.HID_REMOTE_EXCEPTION, e.getMessage(), cancelCallback);
 			e.printStackTrace();
 		}catch (ServerUnsupportedOperationException e) {
 			Log.d(LOG_TAG, "HID:transactionCancel: ServerUnsupportedOperationException " + e.getStackTrace());
-			genericExecuteCallback("ServerUnsupportedOperationException", e.getMessage(), cancelCallback);
+			genericExecuteCallback(ApproveSDKConstants.HID_SERVER_UNSUPPORTED_OPERATION_EXCEPTION, e.getMessage(), cancelCallback);
 			e.printStackTrace();
 		}catch (TransactionCanceledException e) {
 			Log.d(LOG_TAG, "HID:transactionCancel: TransactionCanceledException " + e.getStackTrace());
-			genericExecuteCallback("TransactionCanceledException", e.getMessage(), cancelCallback);
+			genericExecuteCallback(ApproveSDKConstants.HID_TRANSACTION_CANCELED_EXCEPTION, e.getMessage(), cancelCallback);
 			e.printStackTrace();
 		}catch (TransactionExpiredException e) {
 			Log.d(LOG_TAG, "HID:transactionCancel: TransactionExpiredException " + e.getStackTrace());
-			genericExecuteCallback("TransactionExpiredException", e.getMessage(), cancelCallback);
+			genericExecuteCallback(ApproveSDKConstants.HID_TRANSACTION_EXPIRED_EXCEPTION, e.getMessage(), cancelCallback);
 			e.printStackTrace();
 		}catch(Exception e) {
 			Log.d(LOG_TAG, "HID:transactionCancel: Exception " + e.getStackTrace());
@@ -1298,7 +1308,7 @@ public class ApproveSDKWrapper {
 	 */
 	public void notifyPassword(String password, String mode) {
 		Log.d(LOG_TAG, "HID:notifyPassword Inside notifyPassword");
-		if (mode.equals(ApproveSDKConstants.SIGN_TRANSACTION_FLOW)) {
+		if (mode.equals(ApproveSDKConstants.HID_SIGN_TRANSACTION_FLOW)) {
 			if (signTransactionMonitor != null) {
 				Log.d(LOG_TAG, "HID:notifyPassword Notifying");
 				synchronized (signTransactionMonitor) {
@@ -1306,7 +1316,7 @@ public class ApproveSDKWrapper {
 					signTransactionMonitor.notify();
 				}
 			}
-		} else if (mode.equals(ApproveSDKConstants.NOTIFICATION_FLOW)) {
+		} else if (mode.equals(ApproveSDKConstants.HID_NOTIFICATION_FLOW)) {
 			if (notificationMonitor != null) {
 				Log.d(LOG_TAG, "HID:notifyPassword Notifying");
 				synchronized (notificationMonitor) {
@@ -1344,12 +1354,15 @@ public class ApproveSDKWrapper {
 	public boolean deleteContainer(Context appContext) {
 		this.appContext = appContext;
 		try {
-			Container container = getSingleUserContainer();
+			Container singleContainer = getSingleUserContainer();
+			if (singleContainer == null) {
+				throw new IllegalArgumentException("HID:deleteContainer: Container must not be null.");
+			}
 			Device device = DeviceFactory.getDevice(appContext, new ConnectionConfiguration());
-			device.deleteContainer(container.getId(), null);
+			device.deleteContainer(singleContainer.getId(), null);
 		} catch (Exception e) {
 			e.printStackTrace();
-			Log.d(LOG_TAG, "HID:deleteContainer: Exception " + e.getStackTrace());
+			Log.d(LOG_TAG, "HID:deleteContainer: Exception" + e.getStackTrace());
 			return false;
 		}
 		return true;
@@ -1366,14 +1379,14 @@ public class ApproveSDKWrapper {
 	public boolean deleteContainerWithReason(Context appContext, String reason) {
 		this.appContext = appContext;
 		try {
-			Container container = getSingleUserContainer();
+			Container singleContainer = getSingleUserContainer();
 			Device device = DeviceFactory.getDevice(appContext, new ConnectionConfiguration());
 			final String reasonParam = reason;
 			Log.d(LOG_TAG, "HID:deleteContainerWithReason: Reason for deletion: " + reasonParam);
 			if (reason == null || reason.isEmpty()) {
 				reason = null; // If reason is empty, set it to null
 			}
-			deleteContainer(this.appContext, container, reasonParam);
+			deleteContainer(this.appContext, singleContainer, reasonParam);
 		} catch (Exception e) {
 			e.printStackTrace();
 			Log.d(LOG_TAG, "HID:deleteContainerWithReason: Exception " + e.getStackTrace());
@@ -1445,22 +1458,24 @@ public class ApproveSDKWrapper {
 	 * @param callback - The callback function to execute after deletion.
 	 */
 	public void deleteContainerWithAuth(Context context, FragmentActivity activity, String pwd, Function callback) {
-		Container container = getSingleUserContainer();
+		Container singleContainer = getSingleUserContainer();
 		try {
-			PasswordPolicy policy = (PasswordPolicy) container.getProtectionPolicy();
+			if(singleContainer == null) {
+				throw new IllegalArgumentException("HID:deleteContainerWithAuth: Container must not be null.");
+			}
+			PasswordPolicy policy = (PasswordPolicy) singleContainer.getProtectionPolicy();
 			if (pwd.isEmpty() && checkForBioAvailability(context)) {
 				BiometricAuthService bioAuthService = new BiometricAuthService();
-				bioAuthService.setBiometricPrompt(activity, ApproveSDKConstants.BIO_PROMPT_DELETE_USER,
-						container.getProtectionPolicy(), new FingerprintHandler.BiometricEventListener() {
+				bioAuthService.setBiometricPrompt(activity, ApproveSDKConstants.HID_BIO_PROMPT_DELETE_USER,
+						singleContainer.getProtectionPolicy(), new FingerprintHandler.BiometricEventListener() {
 							@Override
 							public void onAuthSuccess() {
 								try {
-//									policy.verifyPassword(null);
-									String status = deleteContainer(context, container) ? "success" : "failure";
+									String status = deleteContainer(context, singleContainer) ? ApproveSDKConstants.HID_SUCCESS_MESSAGE : ApproveSDKConstants.HID_FAILURE_MESSAGE;
 									Log.d(LOG_TAG, "HID:deleteContainerWithAuth: status " + status);
 									executeDeleteContainerCB(callback, status);
 								} catch (Exception e) {
-									executeDeleteContainerCB(callback, "failure");
+									executeDeleteContainerCB(callback, ApproveSDKConstants.HID_FAILURE_MESSAGE);
 									Log.d(LOG_TAG, "HID:deleteContainerWithAuth: Exception " + e.getStackTrace());
 									e.printStackTrace();
 								}
@@ -1468,13 +1483,13 @@ public class ApproveSDKWrapper {
 
 							@Override
 							public void onAuthFailed() {
-								executeDeleteContainerCB(callback, ApproveSDKConstants.FINGERPRINT_EXCEPTION);
+								executeDeleteContainerCB(callback, ApproveSDKConstants.HID_FINGERPRINT_EXCEPTION);
 								Log.d(LOG_TAG, "HID:deleteContainerWithAuth: onAuthFailed");
 							}
 
 							@Override
 							public void onAuthError() {
-								executeDeleteContainerCB(callback, ApproveSDKConstants.FINGERPRINT_EXCEPTION);
+								executeDeleteContainerCB(callback, ApproveSDKConstants.HID_FINGERPRINT_EXCEPTION);
 								Log.d(LOG_TAG, "HID:deleteContainerWithAuth: onAuthError");
 							}
 						});
@@ -1485,51 +1500,51 @@ public class ApproveSDKWrapper {
 				return;
 			} else {
 				policy.verifyPassword(pwd.toCharArray());
-				String status = deleteContainer(context, container) ? "success" : "failure";
+				String status = deleteContainer(context, container) ? ApproveSDKConstants.HID_SUCCESS_MESSAGE : ApproveSDKConstants.HID_FAILURE_MESSAGE;
 				Log.d(LOG_TAG, "HID:deleteContainerWithAuth: status" + status);
 				executeDeleteContainerCB(callback, status);
 			}
 		} catch (AuthenticationException e) {
 			Log.d(LOG_TAG, "HID:deleteContainerWithAuth: AuthenticationException " + e.getStackTrace());
 			e.printStackTrace();
-			executeDeleteContainerCB(callback, ApproveSDKConstants.AUTHENTICATION_EXCEPTION);
+			executeDeleteContainerCB(callback, ApproveSDKConstants.HID_AUTHENTICATION_EXCEPTION);
 		} catch (PasswordRequiredException e) {
 			Log.d(LOG_TAG, "HID:deleteContainerWithAuth: PasswordRequiredException " + e.getStackTrace());
 			e.printStackTrace();
-			executeDeleteContainerCB(callback, ApproveSDKConstants.AUTHENTICATION_EXCEPTION);
+			executeDeleteContainerCB(callback, ApproveSDKConstants.HID_AUTHENTICATION_EXCEPTION);
 		} catch (FingerprintAuthenticationRequiredException e) {
 			Log.d(LOG_TAG,
 					"HID:deleteContainerWithAuth: FingerprintAuthenticationRequiredException " + e.getStackTrace());
 			e.printStackTrace();
-			executeDeleteContainerCB(callback, "FingerprintAuthenticationRequiredException");
+			executeDeleteContainerCB(callback, ApproveSDKConstants.HID_FINGERPRINT_AUTHENTICATION_REQUIRED_EXCEPTION);
 		} catch (FingerprintNotEnrolledException e) {
 			Log.d(LOG_TAG, "HID:deleteContainerWithAuth: FingerprintNotEnrolledException " + e.getStackTrace());
 			e.printStackTrace();
-			executeDeleteContainerCB(callback, "FingerprintNotEnrolledException");
+			executeDeleteContainerCB(callback, ApproveSDKConstants.HID_FINGERPRINT_NOT_ENROLLED_EXCEPTION);
 		} catch (UnsupportedDeviceException e) {
 			Log.d(LOG_TAG, "HID:deleteContainerWithAuth: UnsupportedDeviceException " + e.getStackTrace());
 			e.printStackTrace();
-			executeDeleteContainerCB(callback, "UnsupportedDeviceException");
+			executeDeleteContainerCB(callback, ApproveSDKConstants.HID_UNSUPPORTED_DEVICE_EXCEPTION);
 		} catch (InternalException e) {
 			Log.d(LOG_TAG, "HID:deleteContainerWithAuth: InternalException " + e.getStackTrace());
 			e.printStackTrace();
-			executeDeleteContainerCB(callback, "InternalException");
+			executeDeleteContainerCB(callback, ApproveSDKConstants.HID_INTERNAL_EXCEPTION);
 		} catch (LostCredentialsException e) {
 			Log.d(LOG_TAG, "HID:deleteContainerWithAuth: LostCredentialsException " + e.getStackTrace());
 			e.printStackTrace();
-			executeDeleteContainerCB(callback, "LostCredentialsException");
+			executeDeleteContainerCB(callback, ApproveSDKConstants.HID_LOST_CREDENTIALS_EXCEPTION);
 		} catch (PasswordExpiredException e) {
 			Log.d(LOG_TAG, "HID:deleteContainerWithAuth: PasswordExpiredException " + e.getStackTrace());
 			e.printStackTrace();
-			executeDeleteContainerCB(callback, "PasswordExpiredException");
+			executeDeleteContainerCB(callback, ApproveSDKConstants.HID_PASSWORD_EXPIRED_EXCEPTION);
 		} catch (InvalidParameterException e) {
 			Log.d(LOG_TAG, "HID:deleteContainerWithAuth: InvalidParameterException " + e.getStackTrace());
 			e.printStackTrace();
-			executeDeleteContainerCB(callback, "InvalidParameterException");
+			executeDeleteContainerCB(callback, ApproveSDKConstants.HID_INVALID_PARAMETER_EXCEPTION);
 		} catch (Exception e) {
 			Log.d(LOG_TAG, "HID:deleteContainerWithAuth: Exception " + e.getStackTrace());
 			e.printStackTrace();
-			executeDeleteContainerCB(callback, ApproveSDKConstants.GENERIC_EXCEPTION);
+			executeDeleteContainerCB(callback, ApproveSDKConstants.HID_GENERIC_EXCEPTION);
 		}
 	}
 
@@ -1544,30 +1559,29 @@ public class ApproveSDKWrapper {
 	 */
 	public void deleteContainerAuthWithReason(Context context, FragmentActivity activity, String pwd, String reason,
 			Function callback) {
-		Container container = getSingleUserContainer();
+		Container singleContainer = getSingleUserContainer();
 		final String reasonParam = reason;
-		Log.d(LOG_TAG, "HID:deleteContainerAuthWithReason: Reason for deletion: " + reasonParam);
+		Log.d(LOG_TAG, "HID:deleteContainerAuthWithReason: Reason for deletion with Auth: " + reasonParam);
 		if (reason == null || reason.isEmpty()) {
 			reason = null; // If reason is empty, set it to null
 		}
 		try {
-			PasswordPolicy policy = (PasswordPolicy) container.getProtectionPolicy();
+			PasswordPolicy policy = (PasswordPolicy) singleContainer.getProtectionPolicy();
 			if (pwd.isEmpty() && checkForBioAvailability(context)) {
 				BiometricAuthService bioAuthService = new BiometricAuthService();
-				bioAuthService.setBiometricPrompt(activity, ApproveSDKConstants.BIO_PROMPT_DELETE_USER,
-						container.getProtectionPolicy(), new FingerprintHandler.BiometricEventListener() {
+				bioAuthService.setBiometricPrompt(activity, ApproveSDKConstants.HID_BIO_PROMPT_DELETE_USER,
+						singleContainer.getProtectionPolicy(), new FingerprintHandler.BiometricEventListener() {
 							@Override
 							public void onAuthSuccess() {
 								try {
-//									policy.verifyPassword(null);
 									Log.d(LOG_TAG,
 											"HID:deleteContainerAuthWithReason: Reason for deletion: " + reasonParam);
-									String status = deleteContainer(context, container, reasonParam) ? "success"
-											: "failure";
+									String status = deleteContainer(context, singleContainer, reasonParam) ? ApproveSDKConstants.HID_SUCCESS_MESSAGE
+											: ApproveSDKConstants.HID_FAILURE_MESSAGE;
 									Log.d(LOG_TAG, "HID:deleteContainerAuthWithReason: status " + status);
 									executeDeleteContainerCB(callback, status);
 								} catch (Exception e) {
-									executeDeleteContainerCB(callback, "failure");
+									executeDeleteContainerCB(callback, ApproveSDKConstants.HID_FAILURE_MESSAGE);
 									Log.d(LOG_TAG, "HID:deleteContainerAuthWithReason: Exception " + e.getStackTrace());
 									e.printStackTrace();
 								}
@@ -1575,13 +1589,13 @@ public class ApproveSDKWrapper {
 
 							@Override
 							public void onAuthFailed() {
-								executeDeleteContainerCB(callback, ApproveSDKConstants.FINGERPRINT_EXCEPTION);
+								executeDeleteContainerCB(callback, ApproveSDKConstants.HID_FINGERPRINT_EXCEPTION);
 								Log.d(LOG_TAG, "HID:deleteContainerAuthWithReason: onAuthFailed");
 							}
 
 							@Override
 							public void onAuthError() {
-								executeDeleteContainerCB(callback, ApproveSDKConstants.FINGERPRINT_EXCEPTION);
+								executeDeleteContainerCB(callback, ApproveSDKConstants.HID_FINGERPRINT_EXCEPTION);
 								Log.d(LOG_TAG, "HID:deleteContainerAuthWithReason: onAuthError");
 							}
 						});
@@ -1593,51 +1607,51 @@ public class ApproveSDKWrapper {
 			} else {
 				policy.verifyPassword(pwd.toCharArray());
 				Log.d(LOG_TAG, "HID:deleteContainerAuthWithReason: Reason for deletion: " + reasonParam);
-				String status = deleteContainer(context, container, reasonParam) ? "success" : "failure";
+				String status = deleteContainer(context, singleContainer, reasonParam) ? ApproveSDKConstants.HID_SUCCESS_MESSAGE : ApproveSDKConstants.HID_FAILURE_MESSAGE;
 				Log.d(LOG_TAG, "HID:deleteContainerAuthWithReason: status" + status);
 				executeDeleteContainerCB(callback, status);
 			}
 		} catch (AuthenticationException e) {
 			Log.d(LOG_TAG, "HID:deleteContainerAuthWithReason: AuthenticationException " + e.getStackTrace());
 			e.printStackTrace();
-			executeDeleteContainerCB(callback, ApproveSDKConstants.AUTHENTICATION_EXCEPTION);
+			executeDeleteContainerCB(callback, ApproveSDKConstants.HID_AUTHENTICATION_EXCEPTION);
 		} catch (PasswordRequiredException e) {
 			Log.d(LOG_TAG, "HID:deleteContainerAuthWithReason: PasswordRequiredException " + e.getStackTrace());
 			e.printStackTrace();
-			executeDeleteContainerCB(callback, ApproveSDKConstants.AUTHENTICATION_EXCEPTION);
+			executeDeleteContainerCB(callback, ApproveSDKConstants.HID_AUTHENTICATION_EXCEPTION);
 		} catch (FingerprintAuthenticationRequiredException e) {
 			Log.d(LOG_TAG, "HID:deleteContainerAuthWithReason: FingerprintAuthenticationRequiredException "
 					+ e.getStackTrace());
 			e.printStackTrace();
-			executeDeleteContainerCB(callback, "FingerprintAuthenticationRequiredException");
+			executeDeleteContainerCB(callback, ApproveSDKConstants.HID_FINGERPRINT_AUTHENTICATION_REQUIRED_EXCEPTION);
 		} catch (FingerprintNotEnrolledException e) {
 			Log.d(LOG_TAG, "HID:deleteContainerAuthWithReason: FingerprintNotEnrolledException " + e.getStackTrace());
 			e.printStackTrace();
-			executeDeleteContainerCB(callback, "FingerprintNotEnrolledException");
+			executeDeleteContainerCB(callback, ApproveSDKConstants.HID_FINGERPRINT_NOT_ENROLLED_EXCEPTION);
 		} catch (UnsupportedDeviceException e) {
 			Log.d(LOG_TAG, "HID:deleteContainerAuthWithReason: UnsupportedDeviceException " + e.getStackTrace());
 			e.printStackTrace();
-			executeDeleteContainerCB(callback, "UnsupportedDeviceException");
+			executeDeleteContainerCB(callback, ApproveSDKConstants.HID_UNSUPPORTED_DEVICE_EXCEPTION);
 		} catch (InternalException e) {
 			Log.d(LOG_TAG, "HID:deleteContainerAuthWithReason: InternalException " + e.getStackTrace());
 			e.printStackTrace();
-			executeDeleteContainerCB(callback, "InternalException");
+			executeDeleteContainerCB(callback, ApproveSDKConstants.HID_INTERNAL_EXCEPTION);
 		} catch (LostCredentialsException e) {
 			Log.d(LOG_TAG, "HID:deleteContainerAuthWithReason: LostCredentialsException " + e.getStackTrace());
 			e.printStackTrace();
-			executeDeleteContainerCB(callback, "LostCredentialsException");
+			executeDeleteContainerCB(callback, ApproveSDKConstants.HID_LOST_CREDENTIALS_EXCEPTION);
 		} catch (PasswordExpiredException e) {
 			Log.d(LOG_TAG, "HID:deleteContainerAuthWithReason: PasswordExpiredException " + e.getStackTrace());
 			e.printStackTrace();
-			executeDeleteContainerCB(callback, "PasswordExpiredException");
+			executeDeleteContainerCB(callback, ApproveSDKConstants.HID_PASSWORD_EXPIRED_EXCEPTION);
 		} catch (InvalidParameterException e) {
 			Log.d(LOG_TAG, "HID:deleteContainerAuthWithReason: InvalidParameterException " + e.getStackTrace());
 			e.printStackTrace();
-			executeDeleteContainerCB(callback, "InvalidParameterException");
+			executeDeleteContainerCB(callback, ApproveSDKConstants.HID_INVALID_PARAMETER_EXCEPTION);
 		} catch (Exception e) {
 			Log.d(LOG_TAG, "HID:deleteContainerAuthWithReason: Exception " + e.getStackTrace());
 			e.printStackTrace();
-			executeDeleteContainerCB(callback, ApproveSDKConstants.GENERIC_EXCEPTION);
+			executeDeleteContainerCB(callback, ApproveSDKConstants.HID_GENERIC_EXCEPTION);
 		}
 	}
 
@@ -1662,15 +1676,14 @@ public class ApproveSDKWrapper {
 	 * @return string - representing the device ID.
 	 */
 	public String getDeviceProperty() {
-		Container container = getSingleUserContainer();
+		Container singleContainer = getSingleUserContainer();
 		String deviceId = "";
 		Log.d(LOG_TAG, "HID:getDeviceProperty");
 		try {
-			deviceId = new String(container.getProperty(ApproveSDKConstants.DEVICE_ID));
+			deviceId = new String(singleContainer.getProperty(ApproveSDKConstants.HID_DEVICE_ID));
 			Log.d(LOG_TAG, "HID:getDeviceProperty deviceId" + deviceId);
 
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			Log.d(LOG_TAG, "HID:getDeviceProperty Exception " + e.getStackTrace());
 			e.printStackTrace();
 		}
@@ -1685,8 +1698,8 @@ public class ApproveSDKWrapper {
 	 * @return string - representing the friendly name of the container.
 	 */
 	public String getContainerFriendlyName() {
-		Container container = getSingleUserContainer();
-		String name = container.getName();
+		Container singleContainer = getSingleUserContainer();
+		String name = singleContainer.getName();
 		Log.d(LOG_TAG, "HID:getContainerFriendlyName Container Friendly Name --> " + name);
 		return name;
 	}
@@ -1717,7 +1730,10 @@ public class ApproveSDKWrapper {
 			}
 			StringBuffer multiContainer = new StringBuffer("MultiLogin:");
 			for (Container c : containers) {
-				multiContainer.append(c.getUserId() + ",").append(c.getName() + "|");
+				multiContainer.append(c.getUserId());
+				multiContainer.append(",");
+				multiContainer.append(c.getName());
+				multiContainer.append("|");
 			}
 			Log.d(LOG_TAG,
 					"HID:getMultiContainerFriendlyName getContainerFriendlyName Container Login, UserId & Friendly Name --> "
@@ -1773,27 +1789,27 @@ public class ApproveSDKWrapper {
 					Log.d(LOG_TAG, "HID:setContainerFriendlyName Friendly Name --> " + friendlyName);
 					c.setName(friendlyName);
 					Log.d(LOG_TAG, "HID:setContainerFriendlyName New Friendly Name -->" + friendlyName);
-					executeSetNameCallback(setNameCallback, "Container Friendly Name Set Successfully", "success");
+					executeSetNameCallback(setNameCallback, "Container Friendly Name Set Successfully", ApproveSDKConstants.HID_SUCCESS_MESSAGE);
 				}
 			}
 		} catch (UnsupportedDeviceException ude) {
-			executeSetNameCallback(setNameCallback, ApproveSDKConstants.UNSUPPORTED_DEVICE_EXCEPTION,
-					ApproveSDKConstants.UNSUPPORTED_DEVICE_CODE);
+			executeSetNameCallback(setNameCallback, ApproveSDKConstants.HID_UNSUPPORTED_DEVICE_EXCEPTION,
+					ApproveSDKConstants.HID_UNSUPPORTED_DEVICE_CODE);
 			Log.e(LOG_TAG, "HID:setContainerFriendlyName UnsupportedDeviceException " + ude.getStackTrace());
 			ude.printStackTrace();
 		} catch (LostCredentialsException lce) {
-			executeSetNameCallback(setNameCallback, ApproveSDKConstants.LOST_CREDENTIALS_EXCEPTION,
-					ApproveSDKConstants.LOST_CREDENTIALS_CODE);
+			executeSetNameCallback(setNameCallback, ApproveSDKConstants.HID_LOST_CREDENTIALS_EXCEPTION,
+					ApproveSDKConstants.HID_LOST_CREDENTIALS_CODE);
 			Log.e(LOG_TAG, "HID:setContainerFriendlyName LostCredentialsException " + lce.getStackTrace());
 			lce.printStackTrace();
 		} catch (InternalException ie) {
-			executeSetNameCallback(setNameCallback, ApproveSDKConstants.INTERNAL_EXCEPTION,
-					ApproveSDKConstants.INTERNAL_EXCEPTION_CODE);
+			executeSetNameCallback(setNameCallback, ApproveSDKConstants.HID_INTERNAL_EXCEPTION,
+					ApproveSDKConstants.HID_INTERNAL_EXCEPTION_CODE);
 			Log.e(LOG_TAG, "HID:setContainerFriendlyName InternalException " + ie.getStackTrace());
 			ie.printStackTrace();
 		} catch (InvalidParameterException ipe) {
-			executeSetNameCallback(setNameCallback, ApproveSDKConstants.INVALID_PARAMETER_EXCEPTION,
-					ApproveSDKConstants.INVALID_PARAMETER_CODE);
+			executeSetNameCallback(setNameCallback, ApproveSDKConstants.HID_INVALID_PARAMETER_EXCEPTION,
+					ApproveSDKConstants.HID_INVALID_PARAMETER_CODE);
 			Log.e(LOG_TAG, "HID:setContainerFriendlyName InvalidParameterException " + ipe.getStackTrace());
 			ipe.printStackTrace();
 		} catch (Exception e) {
@@ -1817,7 +1833,6 @@ public class ApproveSDKWrapper {
 			Log.d(LOG_TAG, "HID:executeSetNameCallback Callback Executed with EventType " + eventType);
 			Log.d(LOG_TAG, "HID:executeSetNameCallback Callback Executed with EventCode " + eventCode);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			Log.e(LOG_TAG, "HID:executeSetNameCallback executeSetNameCallback Exception " + e.getStackTrace());
 			e.printStackTrace();
 		}
@@ -1842,25 +1857,25 @@ public class ApproveSDKWrapper {
 				return null;
 			}
 
-			if (otpLabel == "hotp" || otpLabel == "totp") {
-				if (code == ApproveSDKConstants.CODE_SECURE) {
+			if (otpLabel.equals("hotp") || otpLabel.equals("totp")) {
+				if (code.equals(ApproveSDKConstants.HID_CODE_SECURE)) {
 					otpLabel = OtpKeyLabel.OATH_OCRA_HOTP_SIGN_LABEL.getCode();
-					if (otpLabel.toLowerCase().equals(ApproveSDKConstants.TOTP_KEY)) {
+					if (otpLabel.equalsIgnoreCase(ApproveSDKConstants.HID_TOTP_KEY)) {
 						otpLabel = OtpKeyLabel.OATH_OCRA_TOTP_SIGN_LABEL.getCode();
 						Log.d(LOG_TAG, "HID:getLockPolicy - otpLabel changed to: " + otpLabel);
 					}
 				}
-				if (code == ApproveSDKConstants.CODE_SIGN) {
+				if (code.equals(ApproveSDKConstants.HID_CODE_SIGN)) {
 					otpLabel = OtpKeyLabel.OATH_OCRA_HOTP_SIGN_LABEL.getCode();
-					if (otpLabel.toLowerCase().equals(ApproveSDKConstants.TOTP_KEY)) {
+					if (otpLabel.equalsIgnoreCase(ApproveSDKConstants.HID_TOTP_KEY)) {
 						otpLabel = OtpKeyLabel.OATH_OCRA_HOTP_SIGN_LABEL.getCode();
 						Log.d(LOG_TAG, "HID:getLockPolicy - otpLabel changed to: " + otpLabel);
 					}
 				}
 
 			}
-			Container container = getSingleUserContainer();
-			ProtectionPolicy otpKeyPolicy = container.getProtectionPolicy();
+			Container singleContainer = getSingleUserContainer();
+			ProtectionPolicy otpKeyPolicy = singleContainer.getProtectionPolicy();
 			Log.d(LOG_TAG, "HID:getLockPolicy - OTP key policy: " + otpKeyPolicy);
 			if (otpKeyPolicy == null) {
 				Log.d(LOG_TAG, "HID:getLockPolicy - No OTP key policy found");
@@ -1869,10 +1884,9 @@ public class ApproveSDKWrapper {
 			Log.d(LOG_TAG, "HID:getLockPolicy - OTP key policy found: " + otpKeyPolicy.getType());
 
 			Parameter[] filter;
-//			filter = new Parameter[] { new Parameter(SDKConstants.KEY_PROPERTY_LABEL, otpLabel.toCharArray()) };
 			filter = new Parameter[] {
 					new Parameter(SDKConstants.KEY_PROPERTY_USAGE, SDKConstants.KEY_PROPERTY_USAGE_OTP) };
-			Key[] keys = container.findKeys(filter);
+			Key[] keys = singleContainer.findKeys(filter);
 			Key otpKey = keys[0];
 			Log.d(LOG_TAG, "HID:getLockPolicy - Key Length is " + keys.length);
 			if (keys.length == 0) {
@@ -1971,17 +1985,17 @@ public class ApproveSDKWrapper {
 				containerInfoArray.put(containerInfo);
 			}
 
-			for (Container container : containers) {
-				containerInfo.put("serverURL", container.getServerURL());
-				containerInfo.put("serverDomain", new String(container.getProperty(SDKConstants.PROPERTY_DOMAIN)));
-				containerInfo.put("serverVersion", new String(container.getProperty(SDKConstants.PROPERTY_PROTOCOL_VERSION)));
+			for (Container containerGetInfo : containers) {
+				containerInfo.put("serverURL", containerGetInfo.getServerURL());
+				containerInfo.put("serverDomain", new String(containerGetInfo.getProperty(SDKConstants.PROPERTY_DOMAIN)));
+				containerInfo.put("serverVersion", new String(containerGetInfo.getProperty(SDKConstants.PROPERTY_PROTOCOL_VERSION)));
 				containerInfo.put("deviceId", getDeviceProperty());
-				containerInfo.put("containerId", container.getId());
-				containerInfo.put("containerUserId", container.getUserId());
+				containerInfo.put("containerId", containerGetInfo.getId());
+				containerInfo.put("containerUserId", containerGetInfo.getUserId());
 				containerInfo.put("containerFriendlyName", getContainerFriendlyName());
-				containerInfo.put("containerCreationDate", container.getCreationDate().toString());
-				containerInfo.put("containerExpirationDate", container.getExpiryDate().toString());
-				containerInfo.put("isContainerRenewable", container.isRenewable(null));
+				containerInfo.put("containerCreationDate", containerGetInfo.getCreationDate().toString());
+				containerInfo.put("containerExpirationDate", containerGetInfo.getExpiryDate().toString());
+				containerInfo.put("isContainerRenewable", containerGetInfo.isRenewable(null));
 
 				containerInfoArray.put(containerInfo);
 			}
@@ -2011,10 +2025,10 @@ public class ApproveSDKWrapper {
 		JSONObject result = new JSONObject();
 		JSONArray keyList = new JSONArray();
 		try {
-			Container container = getSingleUserContainer();
+			Container singleContainer = getSingleUserContainer();
 
-			if (container != null) {
-				Key[] keys = container.findKeys(new Parameter[0]);
+			if (singleContainer != null) {
+				Key[] keys = singleContainer.findKeys(new Parameter[0]);
 				for (Key key : keys) {
 					JSONObject keyInfo = new JSONObject();
 
@@ -2045,8 +2059,8 @@ public class ApproveSDKWrapper {
 			}
 
 			
-			result.put("containerId", container.getId());
-			result.put("containerUserId", container.getUserId());
+			result.put("containerId", singleContainer.getId());
+			result.put("containerUserId", singleContainer.getUserId());
 			result.put("totalKeys", keyList.length());
 			result.put("keys", keyList);
 
@@ -2119,15 +2133,15 @@ public class ApproveSDKWrapper {
     				switch (keyMode.toLowerCase()) {
     					case "pkp":
     						keyLabel = OtpKeyLabel.PUSH_KEY_PUBLIC_LABEL.getCode();
-    						Log.d(LOG_TAG, "HID:directClientSignature: Key Label set to: " + keyLabel);
+    						Log.d(LOG_TAG, "HID:directClientSignature: Key Label(pkp) set to: " + keyLabel);
     						break;
     					case "pkip":
     						keyLabel = OtpKeyLabel.PUSH_KEY_IDP_PUBLIC_LABEL.getCode();
-    						Log.d(LOG_TAG, "HID:directClientSignature: Key Label set to: " + keyLabel);
+    						Log.d(LOG_TAG, "HID:directClientSignature: Key Label(pkip) set to: " + keyLabel);
     						break;
     					case "skp":
     						keyLabel = OtpKeyLabel.SIGN_KEY_PUBLIC_LABEL.getCode();
-    						Log.d(LOG_TAG, "HID:directClientSignature: Key Label set to: " + keyLabel);
+    						Log.d(LOG_TAG, "HID:directClientSignature: Key Label(skp) set to: " + keyLabel);
     						break;
     					default:
     						Log.d(LOG_TAG, "HID:directClientSignature: Invalid Key Mode: " + keyMode);
@@ -2136,9 +2150,9 @@ public class ApproveSDKWrapper {
     				}
     			}
     			
-    			Container container = getSingleUserContainer();
+    			Container singleContainer = getSingleUserContainer();
     			
-    			Key[] keys = container.findKeys(new Parameter[0]);
+    			Key[] keys = singleContainer.findKeys(new Parameter[0]);
     			
     			if (keys.length == 0) {
     				Log.d(LOG_TAG, "HID:directClientSignature: No keys found in the container");
@@ -2193,7 +2207,7 @@ public class ApproveSDKWrapper {
     				
     				JSONObject transactionJson = new JSONObject();
     				transactionJson.put("transaction", transaction != null ? transaction : "");
-    				transactionJson.put("transactionPayload", transaction.getPayload() != null ? transaction.getPayload().toString() : "");
+    				transactionJson.put("transactionPayload", transaction.getPayload() != null ? transaction.getPayload() : "");
     				transactionJson.put("keyLabel", otpKey.getProperty(SDKConstants.KEY_PROPERTY_LABEL) != null ? new String(otpKey.getProperty(SDKConstants.KEY_PROPERTY_LABEL)) : "");
     				transactionJson.put("keyId", keyId != null ? keyId : "");
     				Log.d(LOG_TAG, "HID:directClientSignature: Transaction generated successfully for key: " + keyMode + " with Id: " + keyId);
@@ -2248,7 +2262,7 @@ public class ApproveSDKWrapper {
 	            new Thread(() -> {
 	                try {
 	                    Transaction transaction = transactionMonitor.getTransaction();
-	                    Container container = getSingleUserContainer();
+	                    Container singleContainer = getSingleUserContainer();
 
 	                    if (transaction == null) {
 	                    	dcsCallback.execute(new Object[]{"TransactionNotFound", "No transaction available"});
@@ -2258,7 +2272,7 @@ public class ApproveSDKWrapper {
 	                    boolean result;
 	                    if (isBiometricEnabled) {
 	                        BiometricAuthService bioAuthService = new BiometricAuthService();
-	                        bioAuthService.setBiometricPrompt(activity, ApproveSDKConstants.BIO_PROMPT_TITLE_PUSH_FLOW,
+	                        bioAuthService.setBiometricPrompt(activity, ApproveSDKConstants.HID_BIO_PROMPT_TITLE_PUSH_FLOW,
 	                                container.getProtectionPolicy(), new FingerprintHandler.BiometricEventListener() {
 	                                    @Override
 	                                    public void onAuthSuccess() {
@@ -2287,7 +2301,6 @@ public class ApproveSDKWrapper {
 	                	try {
 							handleSetStatusException(e, dcsCallback);
 						} catch (Exception e1) {
-							// TODO Auto-generated catch block
 							e1.printStackTrace();
 						}
 	                } 

@@ -13,12 +13,12 @@ import com.konylabs.vm.Function;
 
 import android.content.Context;
 import android.util.Log;
-
+@SuppressWarnings({"java:S1068", "java:S2142"})
 public class EventListenerCallback implements EventListener {
 	private Context appContext;
 	private WaitNotifyMonitor monitor;
 	private Function promptCallback;
-	private static final String LOG_TAG = ApproveSDKConstants.LOG_TAG;
+	private static final String LOG_TAG = ApproveSDKConstants.HID_LOG_TAG;
 
 	public EventListenerCallback(Context appContext, Function promptCallback, WaitNotifyMonitor monitor) {
 		this.appContext = appContext;
@@ -49,7 +49,6 @@ public class EventListenerCallback implements EventListener {
 				obj.put("maxSpl", policy.getMaxNonAlpha());
 				obj.put("minSpl", policy.getMinNonAlpha());
 			} catch (JSONException e2) {
-				// TODO Auto-generated catch block
 				Log.d(LOG_TAG, "HID:EventListenerCallback onEventReceived JSONException" + e2.getStackTrace());
 				e2.printStackTrace();
 			}

@@ -8,19 +8,19 @@ import androidx.biometric.BiometricPrompt;
 import androidx.fragment.app.FragmentActivity;
 
 public class BiometricAuthService {
-	private static final String LOG_TAG = ApproveSDKConstants.LOG_TAG;
+	private static final String LOG_TAG = ApproveSDKConstants.HID_LOG_TAG;
 
 	public void setBiometricPrompt(FragmentActivity activity, String mainMessage, ProtectionPolicy protectionPolicy,
 			FingerprintHandler.BiometricEventListener bioEventListener) {
 		Log.d(LOG_TAG, "HID:setBiometricPrompt SetBioPrompt called for " + mainMessage);
-		String message = ApproveSDKConstants.BIOMETRIC_PROMPT_TITLE;
+		String message = ApproveSDKConstants.HID_BIOMETRIC_PROMPT_TITLE;
 		if (!"".equals(mainMessage)) {
 			message = mainMessage;
 		}
 		Log.d(LOG_TAG, "HID:setBiometricPrompt SetBioPrompt called for " + message);
 		try {
 			BiometricPrompt.PromptInfo promptInfo = new BiometricPrompt.PromptInfo.Builder().setTitle(message)
-					.setSubtitle(ApproveSDKConstants.BIOMETRIC_PROMPT_SUBTITLE).setNegativeButtonText("cancel").build();
+					.setSubtitle(ApproveSDKConstants.HID_BIOMETRIC_PROMPT_SUBTITLE).setNegativeButtonText("cancel").build();
 			BioPasswordPolicy policy = (BioPasswordPolicy) protectionPolicy;
 			FingerprintHandler fh = new FingerprintHandler(bioEventListener);
 			policy.setBiometricPrompt(activity, fh, promptInfo);

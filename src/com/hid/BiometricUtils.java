@@ -4,9 +4,9 @@ import android.content.Context;
 import android.os.Build;
 import android.util.Log;
 import androidx.biometric.BiometricManager;
-
+@SuppressWarnings("java:S1118")
 public class BiometricUtils {
-	private static final String LOG_TAG = ApproveSDKConstants.LOG_TAG;
+	private static final String LOG_TAG = ApproveSDKConstants.HID_LOG_TAG;
 
 	public static boolean isDeviceFingerPrintEnrolled(Context appContext) {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {

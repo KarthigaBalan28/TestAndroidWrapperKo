@@ -15,11 +15,12 @@ import com.konylabs.vm.Function;
 
 import android.content.Context;
 import android.util.Log;
-
+@SuppressWarnings({"java:S1854"})
 public class RetrievePendingNotifications implements Runnable {
 	private Container container;
 	private Function onRetrieveNotificationsCallback;
-	private static final String LOG_TAG = ApproveSDKConstants.LOG_TAG;
+	private static final String LOG_TAG = ApproveSDKConstants.HID_LOG_TAG;
+	private static final String FAILURE = "failure";
 
 	public RetrievePendingNotifications(Container container, Function onRetrieveNotificationsCallback) {
 		this.container = container;
@@ -43,36 +44,36 @@ public class RetrievePendingNotifications implements Runnable {
 			if (jsonArray.length() != 0)
 				onRetrieveNotificationsCallback("success", retrieveIds, onRetrieveNotificationsCallback);
 			else
-				onRetrieveNotificationsCallback("failure", retrieveIds, onRetrieveNotificationsCallback);
+				onRetrieveNotificationsCallback(FAILURE, retrieveIds, onRetrieveNotificationsCallback);
 
 		} catch (RemoteException e) {
-			onRetrieveNotificationsCallback("failure", "RemoteException", onRetrieveNotificationsCallback);
+			onRetrieveNotificationsCallback(FAILURE, "RemoteException", onRetrieveNotificationsCallback);
 			Log.d(LOG_TAG, "HID:retrievePendingNotifications ApproveSDK-->RemoteException" + e.getStackTrace());
 			e.printStackTrace();
 		} catch (InternalException e) {
-			onRetrieveNotificationsCallback("failure", "InternalException", onRetrieveNotificationsCallback);
+			onRetrieveNotificationsCallback(FAILURE, "InternalException", onRetrieveNotificationsCallback);
 			Log.d(LOG_TAG, "HID:retrievePendingNotifications ApproveSDK-->InternalException" + e.getStackTrace());
 			e.printStackTrace();
 			e.getCause();
 		} catch (FingerprintAuthenticationRequiredException e) {
-			onRetrieveNotificationsCallback("failure", "FingerprintAuthenticationRequiredException",
+			onRetrieveNotificationsCallback(FAILURE, "FingerprintAuthenticationRequiredException",
 					onRetrieveNotificationsCallback);
 			Log.d(LOG_TAG, "HID:retrievePendingNotifications ApproveSDK-->FingerprintAuthenticationRequiredException" + e.getStackTrace());
 			e.printStackTrace();
 		} catch (JSONException e) {
-			onRetrieveNotificationsCallback("failure", "JSONException", onRetrieveNotificationsCallback);
+			onRetrieveNotificationsCallback(FAILURE, "JSONException", onRetrieveNotificationsCallback);
 			Log.d(LOG_TAG, "HID:retrievePendingNotifications ApproveSDK-->JSONException" + e.getStackTrace());
 			e.printStackTrace();
 		} catch (UnsupportedDeviceException e) {
-			onRetrieveNotificationsCallback("failure", "UnsupportedDeviceException", onRetrieveNotificationsCallback);
+			onRetrieveNotificationsCallback(FAILURE, "UnsupportedDeviceException", onRetrieveNotificationsCallback);
 			Log.d(LOG_TAG, "HID:retrievePendingNotifications ApproveSDK-->UnsupportedDeviceException" + e.getStackTrace());
 			e.printStackTrace();
 		} catch (InvalidParameterException e) {
-			onRetrieveNotificationsCallback("failure", "InvalidParameterException", onRetrieveNotificationsCallback);
+			onRetrieveNotificationsCallback(FAILURE, "InvalidParameterException", onRetrieveNotificationsCallback);
 			Log.d(LOG_TAG, "HID:retrievePendingNotifications ApproveSDK-->InvalidParameterException" + e.getStackTrace());
 			e.printStackTrace();
 		} catch (Exception e) {
-			onRetrieveNotificationsCallback("failure", "Exception", onRetrieveNotificationsCallback);
+			onRetrieveNotificationsCallback(FAILURE, "Exception", onRetrieveNotificationsCallback);
 			Log.d(LOG_TAG, "HID:retrievePendingNotifications ApproveSDK-->Exception" + e.getStackTrace());
 			e.printStackTrace();
 		}
