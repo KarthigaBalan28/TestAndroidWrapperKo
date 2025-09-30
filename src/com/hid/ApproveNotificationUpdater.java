@@ -1,12 +1,7 @@
 package com.hid;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
-import com.hid.ApproveSDKConstants;
-import com.hid.FingerprintHandler;
-import com.hid.WaitNotifyMonitor;
-import com.hid.BiometricAuthService;
 import com.hidglobal.ia.service.beans.ConnectionConfiguration;
 import com.hidglobal.ia.service.beans.Parameter;
 import com.hidglobal.ia.service.exception.AuthenticationException;
@@ -19,24 +14,18 @@ import com.hidglobal.ia.service.exception.LostCredentialsException;
 import com.hidglobal.ia.service.exception.PasswordExpiredException;
 import com.hidglobal.ia.service.exception.PasswordRequiredException;
 import com.hidglobal.ia.service.exception.RemoteException;
-import com.hidglobal.ia.service.exception.ServerAuthenticationException;
 import com.hidglobal.ia.service.exception.ServerOperationFailedException;
 import com.hidglobal.ia.service.exception.ServerVersionException;
 import com.hidglobal.ia.service.exception.TransactionExpiredException;
-import com.hidglobal.ia.service.exception.UnsafeDeviceException;
 import com.hidglobal.ia.service.exception.UnsupportedDeviceException;
 import com.hidglobal.ia.service.manager.DeviceFactory;
-import com.hidglobal.ia.service.manager.SDKConstants;
-import com.hidglobal.ia.service.protectionpolicy.BioPasswordPolicy;
 import com.hidglobal.ia.service.protectionpolicy.ProtectionPolicy;
 import com.hidglobal.ia.service.transaction.Container;
 import com.hidglobal.ia.service.transaction.Device;
 import com.hidglobal.ia.service.transaction.ServerActionInfo;
 import com.hidglobal.ia.service.transaction.Transaction;
 import com.konylabs.vm.Function;
-import android.app.Activity;
 import android.content.Context;
-import android.util.Base64;
 import android.util.Log;
 import androidx.fragment.app.FragmentActivity;
 
@@ -152,7 +141,6 @@ public class ApproveNotificationUpdater implements Runnable {
 			Log.d(LOG_TAG, "HID:setNotificationStatus Transaction Expired Exception " + te.getStackTrace());
 			showPasswordFlow(ApproveSDKConstants.HID_TRANSACTION_EXPIRED_EXCEPTION,
 					ApproveSDKConstants.HID_TRANSACTION_EXPIRED_CODE);
-			te.printStackTrace();
 		} catch (InternalException e) {
 			Log.d(LOG_TAG, "HID:setNotificationStatus InternalException" + e.getStackTrace());
 			showPasswordFlow("InternalException", ApproveSDKConstants.HID_PWD_PROMPT_ERROR_EVENT_CODE);
@@ -185,7 +173,6 @@ public class ApproveNotificationUpdater implements Runnable {
 			showPasswordFlow("ServerOperationFailedException", ApproveSDKConstants.HID_PWD_PROMPT_ERROR_EVENT_CODE);
 		} catch (Exception e) {
 			Log.d(LOG_TAG, "HID:setNotificationStatus Exception occured" + e.getStackTrace());
-			e.printStackTrace();
 		}
 	}
 
@@ -213,7 +200,6 @@ public class ApproveNotificationUpdater implements Runnable {
 						}
 					});
 		} catch (UnsupportedDeviceException | InternalException | LostCredentialsException e) {
-			e.printStackTrace();
 			Log.d(LOG_TAG, "HID:setNotificationStatus Exception" + e.getStackTrace());
 			invokePasswordAuth(transaction, ApproveSDKConstants.HID_PWD_PROMPT_ERROR_EVENT_TYPE,
 					ApproveSDKConstants.HID_PWD_PROMPT_ERROR_EVENT_CODE);
@@ -237,7 +223,6 @@ public class ApproveNotificationUpdater implements Runnable {
 			Log.d(LOG_TAG, "HID:setNotificationStatus Transaction Expired Exception " + te.getStackTrace());
 			showPasswordFlow(ApproveSDKConstants.HID_TRANSACTION_EXPIRED_EXCEPTION,
 					ApproveSDKConstants.HID_TRANSACTION_EXPIRED_CODE);
-			te.printStackTrace();
 		} catch (InternalException e) {
 			Log.d(LOG_TAG, "HID:setNotificationStatus InternalException" + e.getStackTrace());
 			showPasswordFlow("InternalException", ApproveSDKConstants.HID_PWD_PROMPT_ERROR_EVENT_CODE);
@@ -265,7 +250,6 @@ public class ApproveNotificationUpdater implements Runnable {
 		} catch (Exception e) {
 			Log.d(LOG_TAG, "HID:setNotificationStatus Exception occured " + e.getStackTrace());
 			showPasswordFlow("Exception", ApproveSDKConstants.HID_PWD_PROMPT_ERROR_EVENT_CODE);
-			e.printStackTrace();
 		}
 	}
 
@@ -289,65 +273,50 @@ public class ApproveNotificationUpdater implements Runnable {
 			Log.d(LOG_TAG, "HID:setNotificationStatus Authentication Required Exception" + e.getStackTrace());
 			invokePasswordAuth(transaction, ApproveSDKConstants.HID_PWD_PROMPT_PROGRESS_EVENT_TYPE,
 					ApproveSDKConstants.HID_PWD_PROMPT_PROGRESS_EVENT_CODE);
-			e.printStackTrace();
 		} catch (FingerprintAuthenticationRequiredException fe) {
 			Log.d(LOG_TAG, "HID:setNotificationStatus fingerprint Required Exception " + fe.getStackTrace());
 			showPasswordFlow(ApproveSDKConstants.HID_PWD_PROMPT_PROGRESS_EVENT_TYPE,
 					ApproveSDKConstants.HID_PWD_PROMPT_PROGRESS_EVENT_CODE);
-			fe.printStackTrace();
 		} catch (PasswordRequiredException pe) {
 			Log.d(LOG_TAG, "HID:setNotificationStatus fingerprint Required Exception" + pe.getStackTrace());
 			invokePasswordAuth(transaction, ApproveSDKConstants.HID_PWD_PROMPT_PROGRESS_EVENT_TYPE,
 					ApproveSDKConstants.HID_PWD_PROMPT_PROGRESS_EVENT_CODE);
-			pe.printStackTrace();
 		} catch (TransactionExpiredException te) {
 			Log.d(LOG_TAG, "HID:setNotificationStatus Transaction Expired Exception " + te.getStackTrace());
 			showPasswordFlow(ApproveSDKConstants.HID_TRANSACTION_EXPIRED_EXCEPTION,
 					ApproveSDKConstants.HID_TRANSACTION_EXPIRED_CODE);
-			te.printStackTrace();
 		} catch (InternalException e) {
 			Log.d(LOG_TAG, "HID:setNotificationStatus InternalException" + e.getStackTrace());
 			showPasswordFlow("InternalException", ApproveSDKConstants.HID_PWD_PROMPT_ERROR_EVENT_CODE);
-			e.printStackTrace();
 		} catch (InvalidParameterException e) {
 			Log.d(LOG_TAG, "HID:setNotificationStatus InvalidParameterException" + e.getStackTrace());
 			showPasswordFlow("InvalidParameterException", ApproveSDKConstants.HID_PWD_PROMPT_ERROR_EVENT_CODE);
-			e.printStackTrace();
 		} catch (UnsupportedDeviceException e) {
 			Log.d(LOG_TAG, "HID:setNotificationStatus UnsupportedDeviceException" + e.getStackTrace());
 			showPasswordFlow("UnsupportedDeviceException", ApproveSDKConstants.HID_PWD_PROMPT_ERROR_EVENT_CODE);
-			e.printStackTrace();
 		} catch (LostCredentialsException e) {
 			Log.d(LOG_TAG, "HID:setNotificationStatus LostCredentialsException" + e.getStackTrace());
 			showPasswordFlow("LostCredentialsException", ApproveSDKConstants.HID_PWD_PROMPT_ERROR_EVENT_CODE);
-			e.printStackTrace();
 		} catch (InvalidContainerException e) {
 			Log.d(LOG_TAG, "HID:setNotificationStatus InvalidContainerException" + e.getStackTrace());
 			showPasswordFlow("InvalidContainerException", ApproveSDKConstants.HID_PWD_PROMPT_ERROR_EVENT_CODE);
-			e.printStackTrace();
 		} catch (InexplicitContainerException e) {
 			Log.d(LOG_TAG, "HID:setNotificationStatus InexplicitContainerException" + e.getStackTrace());
 			showPasswordFlow("InexplicitContainerException", ApproveSDKConstants.HID_PWD_PROMPT_ERROR_EVENT_CODE);
-			e.printStackTrace();
 		} catch (PasswordExpiredException e) {
 			Log.d(LOG_TAG, "HID:setNotificationStatus PasswordExpiredException" + e.getStackTrace());
 			showPasswordFlow("PasswordExpiredException", ApproveSDKConstants.HID_PWD_PROMPT_ERROR_EVENT_CODE);
-			e.printStackTrace();
 		} catch (ServerVersionException e) {
 			Log.d(LOG_TAG, "HID:setNotificationStatus ServerVersionException" + e.getStackTrace());
 			showPasswordFlow("ServerVersionException", ApproveSDKConstants.HID_PWD_PROMPT_ERROR_EVENT_CODE);
-			e.printStackTrace();
 		} catch (RemoteException e) {
 			Log.d(LOG_TAG, "HID:setNotificationStatus RemoteException" + e.getStackTrace());
 			showPasswordFlow("RemoteException", ApproveSDKConstants.HID_PWD_PROMPT_ERROR_EVENT_CODE);
-			e.printStackTrace();
 		} catch (ServerOperationFailedException e) {
 			Log.d(LOG_TAG, "HID:setNotificationStatus ServerOperationFailedException" + e.getStackTrace());
 			showPasswordFlow("ServerOperationFailedException", ApproveSDKConstants.HID_PWD_PROMPT_ERROR_EVENT_CODE);
-			e.printStackTrace();
 		} catch (Exception e) {
 			Log.d(LOG_TAG, "HID:setNotificationStatus Exception occured " + e.getStackTrace());
-			e.printStackTrace();
 		}
 	}
 
@@ -375,59 +344,46 @@ public class ApproveNotificationUpdater implements Runnable {
 			
 		} catch (AuthenticationException e) {
 			Log.d(LOG_TAG, "HID:setNotificationStatus invokePasswordAuth AuthenticationException" + e.getStackTrace());
-			e.printStackTrace();
 			showPasswordFlow(ApproveSDKConstants.HID_PWD_PROMPT_ERROR_EVENT_TYPE,
 					ApproveSDKConstants.HID_PWD_PROMPT_ERROR_EVENT_CODE);
 		} catch (FingerprintAuthenticationRequiredException fe) {
 			Log.d(LOG_TAG, "HID:setNotificationStatus invokePasswordAuth FingerprintAuthenticationRequiredException " + fe.getStackTrace());
-			fe.printStackTrace();
 			showPasswordFlow(ApproveSDKConstants.HID_PWD_PROMPT_PROGRESS_EVENT_TYPE,
 					ApproveSDKConstants.HID_PWD_PROMPT_PROGRESS_EVENT_CODE);
 		} catch (PasswordRequiredException pe) {
 			Log.d(LOG_TAG, "HID:setNotificationStatus invokePasswordAuth PasswordRequiredException" + pe.getStackTrace());
-			pe.printStackTrace();
 			invokePasswordAuth(transaction, ApproveSDKConstants.HID_PWD_PROMPT_PROGRESS_EVENT_TYPE,
 					ApproveSDKConstants.HID_PWD_PROMPT_PROGRESS_EVENT_CODE);
 		} catch (TransactionExpiredException te) {
 			Log.d(LOG_TAG, "HID:setNotificationStatus invokePasswordAuth TransactionExpiredException" + te.getStackTrace());
-			te.printStackTrace();
 			showPasswordFlow(ApproveSDKConstants.HID_TRANSACTION_EXPIRED_EXCEPTION,
 					ApproveSDKConstants.HID_TRANSACTION_EXPIRED_CODE);
 		} catch (PasswordExpiredException e) {
 			Log.d(LOG_TAG, "HID:setNotificationStatus invokePasswordAuth PasswordExpiredException" + e.getStackTrace());
-			e.printStackTrace();
 			showPasswordFlow("PasswordExpiredException", ApproveSDKConstants.HID_PWD_PROMPT_ERROR_EVENT_CODE);
 		} catch (ServerVersionException e) {
 			Log.d(LOG_TAG, "HID:setNotificationStatus invokePasswordAuth ServerVersionException" + e.getStackTrace());
-			e.printStackTrace();
 			showPasswordFlow("ServerVersionException", ApproveSDKConstants.HID_PWD_PROMPT_ERROR_EVENT_CODE);
 		} catch (RemoteException e) {
 			Log.d(LOG_TAG, "HID:setNotificationStatus invokePasswordAuth RemoteException" + e.getStackTrace());
-			e.printStackTrace();
 			showPasswordFlow("RemoteException", ApproveSDKConstants.HID_PWD_PROMPT_ERROR_EVENT_CODE);
 		} catch (LostCredentialsException e) {
 			Log.d(LOG_TAG, "HID:setNotificationStatus invokePasswordAuth LostCredentialsException" + e.getStackTrace());
-			e.printStackTrace();
 			showPasswordFlow("LostCredentialsException", ApproveSDKConstants.HID_PWD_PROMPT_ERROR_EVENT_CODE);
 		} catch (InternalException e) {
 			Log.d(LOG_TAG, "HID:setNotificationStatus invokePasswordAuth InternalException" + e.getStackTrace());
-			e.printStackTrace();
 			showPasswordFlow("InternalException", ApproveSDKConstants.HID_PWD_PROMPT_ERROR_EVENT_CODE);
 		} catch (ServerOperationFailedException e) {
 			Log.d(LOG_TAG, "HID:setNotificationStatus invokePasswordAuth ServerOperationFailedException" + e.getStackTrace());
-			e.printStackTrace();
 			showPasswordFlow("ServerOperationFailedException", ApproveSDKConstants.HID_PWD_PROMPT_ERROR_EVENT_CODE);
 		} catch (InvalidParameterException e) {
 			Log.d(LOG_TAG, "HID:setNotificationStatus invokePasswordAuth InvalidParameterException" + e.getStackTrace());
-			e.printStackTrace();
 			showPasswordFlow("InvalidParameterException", ApproveSDKConstants.HID_PWD_PROMPT_ERROR_EVENT_CODE);
 		} catch (UnsupportedDeviceException e) {
 			Log.d(LOG_TAG, "HID:setNotificationStatus invokePasswordAuth UnsupportedDeviceException" + e.getStackTrace());
-			e.printStackTrace();
 			showPasswordFlow("UnsupportedDeviceException", ApproveSDKConstants.HID_PWD_PROMPT_ERROR_EVENT_CODE);
 		} catch (Exception e) {
 			Log.d(LOG_TAG, "HID:setNotificationStatus invokePasswordAuth Exception occured " + e.getStackTrace());
-			e.printStackTrace();
 			showPasswordFlow("Exception", ApproveSDKConstants.HID_PWD_PROMPT_ERROR_EVENT_CODE);
 		}
 	}

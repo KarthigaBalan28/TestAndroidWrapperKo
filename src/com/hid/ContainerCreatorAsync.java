@@ -10,7 +10,6 @@ import com.hidglobal.ia.service.exception.InvalidParameterException;
 import com.hidglobal.ia.service.exception.InvalidPasswordException;
 import com.hidglobal.ia.service.exception.LostCredentialsException;
 import com.hidglobal.ia.service.exception.PasswordCancelledException;
-import com.hidglobal.ia.service.exception.PasswordRequiredException;
 import com.hidglobal.ia.service.exception.RemoteException;
 import com.hidglobal.ia.service.exception.ServerAuthenticationException;
 import com.hidglobal.ia.service.exception.ServerOperationFailedException;
@@ -70,67 +69,51 @@ public class ContainerCreatorAsync implements Runnable {
 			exceptionCallback("No Exception", "success", exceptionCallback);
 		} catch (UnsupportedDeviceException e) {
 			Log.d(LOG_TAG, "HID:createContainer - UnsupportedDeviceException" + e.getStackTrace());
-			e.printStackTrace();
 			exceptionCallback("UnsupportedDeviceException", e.getMessage(), exceptionCallback);
 		} catch (InternalException e) {
 			Log.d(LOG_TAG, "HID:createContainer - InternalException" + e.getStackTrace());
-			e.printStackTrace();
 			exceptionCallback("InternalException", e.getMessage(), exceptionCallback);
 		} catch (InvalidParameterException e) {
 			Log.d(LOG_TAG, "HID:createContainer - InvalidParameterException" + e.getStackTrace());
-			e.printStackTrace();
 			exceptionCallback("InvalidParameterException", e.getMessage(), exceptionCallback);
 		} catch (RemoteException e) {
 			Log.d(LOG_TAG, "HID:createContainer - RemoteException" + e.getStackTrace());
-			e.printStackTrace();
 			exceptionCallback("RemoteException", e.getMessage(), exceptionCallback);
 		} catch (UnsafeDeviceException e) {
 			Log.d(LOG_TAG, "HID:createContainer - UnsafeDeviceException" + e.getStackTrace());
-			e.printStackTrace();
 			exceptionCallback("UnsafeDeviceException", e.getMessage(), exceptionCallback);
 		} catch (FingerprintAuthenticationRequiredException e) {
 			Log.d(LOG_TAG, "HID:createContainer - FingerprintAuthenticationRequiredException" + e.getStackTrace());
-			e.printStackTrace();
 			exceptionCallback("FingerprintAuthenticationRequiredException", e.getMessage(), exceptionCallback);
 		} catch (FingerprintNotEnrolledException e) {
 			Log.d(LOG_TAG, "HID:createContainer - FingerprintNotEnrolledException" + e.getStackTrace());
-			e.printStackTrace();
 			exceptionCallback("FingerprintNotEnrolledException", e.getMessage(), exceptionCallback);
 		} catch (ServerProtocolException e) {
 			Log.d(LOG_TAG, "HID:createContainer - ServerProtocolException" + e.getStackTrace());
-			e.printStackTrace();
 			exceptionCallback("ServerProtocolException", e.getMessage(), exceptionCallback);
 		} catch (ServerAuthenticationException e) {
 			Log.d(LOG_TAG, "HID:createContainer - ServerAuthenticationException" + e.getStackTrace());
-			e.printStackTrace();
 			exceptionCallback("ServerAuthenticationException", e.getMessage(), exceptionCallback);
 		} catch (AuthenticationException e) {
 			Log.d(LOG_TAG, "HID:createContainer - AuthenticationException" + e.getStackTrace());
-			e.printStackTrace();
 			exceptionCallback("AuthenticationException", e.getMessage(), exceptionCallback);
 		} catch (InvalidPasswordException e) {
 			Log.d(LOG_TAG, "HID:createContainer - InvalidPasswordException" + e.getStackTrace());
-			e.printStackTrace();
 			exceptionCallback("InvalidPasswordException", e.getMessage(), exceptionCallback);
 		} catch (PasswordCancelledException e) {
 			Log.d(LOG_TAG, "HID:createContainer - PasswordCancelledException" + e.getStackTrace());
-			e.printStackTrace();
 			exceptionCallback("PasswordCancelledException", e.getMessage(), exceptionCallback);
 		} catch (LostCredentialsException e) {
 			Log.d(LOG_TAG, "HID:createContainer - LostCredentialsException" + e.getStackTrace());
-			e.printStackTrace();
 			exceptionCallback("LostCredentialsException", e.getMessage(), exceptionCallback);
 		} catch (GooglePlayServicesObsoleteException e) {
 			Log.d(LOG_TAG, "HID:createContainer - GooglePlayServicesObsoleteException" + e.getStackTrace());
-			e.printStackTrace();
 			exceptionCallback("GooglePlayServicesObsoleteException", e.getMessage(), exceptionCallback);
 		} catch (ServerOperationFailedException e) {
 			Log.d(LOG_TAG, "HID:createContainer - ServerOperationFailedException" + e.getStackTrace());
-			e.printStackTrace();
 			exceptionCallback("ServerOperationFailedException", e.getMessage(), exceptionCallback);
 		}catch (Exception e) {
 			Log.d(LOG_TAG, "HID:createContainer - Unhandled Exception" + e.getStackTrace());
-			e.printStackTrace();
 			exceptionCallback("Unhandled Exception", e.getMessage(), exceptionCallback);
 		}finally {
 			Log.d(LOG_TAG, "HID:createContainer - Container Thread completed");
@@ -144,7 +127,6 @@ public class ContainerCreatorAsync implements Runnable {
 		try {
 			callback.execute(params);
 		} catch (Exception e) {
-			e.printStackTrace();
 			Log.d(LOG_TAG, "HID:createContainer - Unhandled Exception" + e.getStackTrace());
 		}
 	}

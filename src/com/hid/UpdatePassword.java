@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.hidglobal.ia.service.beans.ConnectionConfiguration;
 import com.hidglobal.ia.service.beans.Parameter;
 import com.hidglobal.ia.service.exception.AuthenticationException;
 import com.hidglobal.ia.service.exception.FingerprintAuthenticationRequiredException;
@@ -14,7 +13,6 @@ import com.hidglobal.ia.service.exception.InternalException;
 import com.hidglobal.ia.service.exception.InvalidParameterException;
 import com.hidglobal.ia.service.exception.InvalidPasswordException;
 import com.hidglobal.ia.service.exception.LostCredentialsException;
-import com.hidglobal.ia.service.exception.PasswordCancelledException;
 import com.hidglobal.ia.service.exception.PasswordNotYetUpdatableException;
 import com.hidglobal.ia.service.exception.PasswordRequiredException;
 import com.hidglobal.ia.service.exception.UnsupportedDeviceException;
@@ -23,14 +21,13 @@ import com.hidglobal.ia.service.manager.SDKConstants;
 import com.hidglobal.ia.service.protectionpolicy.PasswordPolicy;
 import com.hidglobal.ia.service.protectionpolicy.ProtectionPolicy;
 import com.hidglobal.ia.service.transaction.Container;
-import com.hidglobal.ia.service.transaction.ContainerInitialization;
 import com.hidglobal.ia.service.transaction.Device;
 import com.hidglobal.ia.service.transaction.Key;
 import com.konylabs.vm.Function;
 
 import android.content.Context;
 import android.util.Log;
-@SuppressWarnings({"java:S3776"})
+@SuppressWarnings({"java:S3776","java:S3012","java:S1168"})
 public class UpdatePassword implements Runnable {
 	private Context appContext;
 	private Function exceptionCallback;
@@ -66,8 +63,8 @@ public class UpdatePassword implements Runnable {
 				Set<String> processedPolicies = new HashSet<>();
 				for (Key key : keys) {
 					ProtectionPolicy policy = key.getProtectionPolicy();
-					if ((policy.getType() == ProtectionPolicy.PolicyType.PASSWORD.toString()
-							|| policy.getType() == ProtectionPolicy.PolicyType.BIOPASSWORD.toString())
+					if ((policy.getType().equals(ProtectionPolicy.PolicyType.PASSWORD.toString())
+							|| policy.getType().equals(ProtectionPolicy.PolicyType.BIOPASSWORD.toString()))
 							&& !processedPolicies.contains(policy.getId().getId())) {
 						result = ((PasswordPolicy) policy).changePassword(oldPassword.toCharArray(),
 								newPassword.toCharArray());
@@ -85,47 +82,36 @@ public class UpdatePassword implements Runnable {
 
 		} catch (UnsupportedDeviceException e) {
 			Log.d(LOG_TAG, "HID:updatePassword - UnsupportedDeviceException" + e.getStackTrace());
-			e.printStackTrace();
 			exceptionCallback("UnsupportedDeviceException", e.getMessage(), exceptionCallback);
 		} catch (AuthenticationException e) {
 			Log.d(LOG_TAG, "HID:updatePassword - AuthenticationException" + e.getStackTrace());
-			e.printStackTrace();
 			exceptionCallback("AuthenticationException", e.getMessage(), exceptionCallback);
 		} catch (InvalidPasswordException e) {
 			Log.d(LOG_TAG, "HID:updatePassword - InvalidPasswordException" + e.getStackTrace());
-			e.printStackTrace();
 			exceptionCallback("InvalidPasswordException", e.getMessage(), exceptionCallback);
 		} catch (LostCredentialsException e) {
 			Log.d(LOG_TAG, "HID:updatePassword - LostCredentialsException" + e.getStackTrace());
-			e.printStackTrace();
 			exceptionCallback("LostCredentialsException", e.getMessage(), exceptionCallback);
 		} catch (InternalException e) {
 			Log.d(LOG_TAG, "HID:updatePassword - InternalException" + e.getStackTrace());
-			e.printStackTrace();
 			exceptionCallback("InternalException", e.getMessage(), exceptionCallback);
 		} catch (PasswordNotYetUpdatableException e) {
 			Log.d(LOG_TAG, "HID:updatePassword - PasswordNotYetUpdatableException" + e.getStackTrace());
-			e.printStackTrace();
 			exceptionCallback("PasswordNotYetUpdatableException", e.getMessage(), exceptionCallback);
 		} catch (FingerprintAuthenticationRequiredException e) {
 			Log.d(LOG_TAG, "HID:updatePassword - FingerprintAuthenticationRequiredException" + e.getStackTrace());
-			e.printStackTrace();
 			exceptionCallback("FingerprintAuthenticationRequiredException", e.getMessage(), exceptionCallback);
 		} catch (FingerprintNotEnrolledException e) {
 			Log.d(LOG_TAG, "HID:updatePassword - FingerprintNotEnrolledException" + e.getStackTrace());
-			e.printStackTrace();
 			exceptionCallback("FingerprintNotEnrolledException", e.getMessage(), exceptionCallback);
 		} catch (PasswordRequiredException e) {
 			Log.d(LOG_TAG, "HID:updatePassword - PasswordRequiredException" + e.getStackTrace());
-			e.printStackTrace();
 			exceptionCallback("PasswordRequiredException", e.getMessage(), exceptionCallback);
 		} catch (InvalidParameterException e) {
 			Log.d(LOG_TAG, "HID:updatePassword - InvalidParameterException" + e.getStackTrace());
-			e.printStackTrace();
 			exceptionCallback("InvalidParameterException", e.getMessage(), exceptionCallback);
 		} catch (Exception e) {
 			Log.d(LOG_TAG, "HID:updatePassword - Unhandled Exception" + e.getStackTrace());
-			e.printStackTrace();
 			exceptionCallback("Unhandled Exception", e.getMessage(), exceptionCallback);
 		} finally {
 			Log.d(LOG_TAG, "HID:updatePassword - UpdatePassword Thread completed");
@@ -139,7 +125,7 @@ public class UpdatePassword implements Runnable {
 		try {
 			callback.execute(params);
 		} catch (Exception e) {
-			e.printStackTrace();
+			Log.e(LOG_TAG, "HID:updatePassword - Exception in callback: " + e.getStackTrace());
 		}
 	}
 

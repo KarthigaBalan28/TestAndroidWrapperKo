@@ -13,7 +13,6 @@ import com.hidglobal.ia.service.exception.UnsupportedDeviceException;
 import com.hidglobal.ia.service.transaction.Container;
 import com.konylabs.vm.Function;
 
-import android.content.Context;
 import android.util.Log;
 @SuppressWarnings({"java:S1854"})
 public class RetrievePendingNotifications implements Runnable {
@@ -49,33 +48,26 @@ public class RetrievePendingNotifications implements Runnable {
 		} catch (RemoteException e) {
 			onRetrieveNotificationsCallback(FAILURE, "RemoteException", onRetrieveNotificationsCallback);
 			Log.d(LOG_TAG, "HID:retrievePendingNotifications ApproveSDK-->RemoteException" + e.getStackTrace());
-			e.printStackTrace();
 		} catch (InternalException e) {
 			onRetrieveNotificationsCallback(FAILURE, "InternalException", onRetrieveNotificationsCallback);
 			Log.d(LOG_TAG, "HID:retrievePendingNotifications ApproveSDK-->InternalException" + e.getStackTrace());
-			e.printStackTrace();
 			e.getCause();
 		} catch (FingerprintAuthenticationRequiredException e) {
 			onRetrieveNotificationsCallback(FAILURE, "FingerprintAuthenticationRequiredException",
 					onRetrieveNotificationsCallback);
 			Log.d(LOG_TAG, "HID:retrievePendingNotifications ApproveSDK-->FingerprintAuthenticationRequiredException" + e.getStackTrace());
-			e.printStackTrace();
 		} catch (JSONException e) {
 			onRetrieveNotificationsCallback(FAILURE, "JSONException", onRetrieveNotificationsCallback);
 			Log.d(LOG_TAG, "HID:retrievePendingNotifications ApproveSDK-->JSONException" + e.getStackTrace());
-			e.printStackTrace();
 		} catch (UnsupportedDeviceException e) {
 			onRetrieveNotificationsCallback(FAILURE, "UnsupportedDeviceException", onRetrieveNotificationsCallback);
 			Log.d(LOG_TAG, "HID:retrievePendingNotifications ApproveSDK-->UnsupportedDeviceException" + e.getStackTrace());
-			e.printStackTrace();
 		} catch (InvalidParameterException e) {
 			onRetrieveNotificationsCallback(FAILURE, "InvalidParameterException", onRetrieveNotificationsCallback);
 			Log.d(LOG_TAG, "HID:retrievePendingNotifications ApproveSDK-->InvalidParameterException" + e.getStackTrace());
-			e.printStackTrace();
 		} catch (Exception e) {
 			onRetrieveNotificationsCallback(FAILURE, "Exception", onRetrieveNotificationsCallback);
 			Log.d(LOG_TAG, "HID:retrievePendingNotifications ApproveSDK-->Exception" + e.getStackTrace());
-			e.printStackTrace();
 		}
 	}
 
@@ -87,7 +79,6 @@ public class RetrievePendingNotifications implements Runnable {
 			callback.execute(params);
 		} catch (Exception e) {
 			Log.d(LOG_TAG, "HID:retrievePendingNotifications ApproveSDK-->Exception" + e.getStackTrace());
-			e.printStackTrace();
 		}
 	}
 

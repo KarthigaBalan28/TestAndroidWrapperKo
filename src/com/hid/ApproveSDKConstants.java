@@ -1,9 +1,8 @@
 package com.hid;
 
-import com.hidglobal.ia.service.exception.FingerprintAuthenticationRequiredException;
 import com.hidglobal.ia.service.transaction.CancelationReason;
 
-@SuppressWarnings({"java:S1118"})
+@SuppressWarnings({"java:S1118","java:S2068"})
 public class ApproveSDKConstants {
 	public static final int HID_MAX_BIO_ATTEMPTS = 3;
 	public static final String HID_BIOMETRIC_PROMPT_TITLE = "Use your fingerprint for fast and easy access to you account";

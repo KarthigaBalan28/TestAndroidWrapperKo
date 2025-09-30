@@ -25,9 +25,8 @@ public class BiometricAuthService {
 			FingerprintHandler fh = new FingerprintHandler(bioEventListener);
 			policy.setBiometricPrompt(activity, fh, promptInfo);
 			Log.d(LOG_TAG, "HID:setBiometricPrompt BiometricPrompt has been set");
-		} catch (Throwable t) {
-			t.printStackTrace();
-			Log.d(LOG_TAG, "HID:setBiometricPrompt Exception in SetBioPrompt " + t.getMessage());
+		} catch (Exception e) {
+			Log.d(LOG_TAG, "HID:setBiometricPrompt Exception in SetBioPrompt " + e.getStackTrace());
 		}
 	}
 }

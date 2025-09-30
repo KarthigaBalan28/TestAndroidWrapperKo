@@ -163,19 +163,14 @@ public class ApproveSDKWrapper {
 			return obj.toString();
 		} catch (JSONException e2) {
 			Log.d(LOG_TAG, "HID:getPasswordPolicy: JSONException" + e2.getStackTrace());
-			e2.printStackTrace();
 		} catch (UnsupportedDeviceException e) {
 			Log.d(LOG_TAG, "HID:getPasswordPolicy: UnsupportedDeviceException" + e.getStackTrace());
-			e.printStackTrace();
 		} catch (InternalException e) {
 			Log.d(LOG_TAG, "HID:getPasswordPolicy: InternalException" + e.getStackTrace());
-			e.printStackTrace();
 		} catch (LostCredentialsException e) {
 			Log.d(LOG_TAG, "HID:getPasswordPolicy: LostCredentialsException" + e.getStackTrace());
-			e.printStackTrace();
 		} catch (Exception e) {
 			Log.d(LOG_TAG, "HID:getPasswordPolicy: Exception" + e.getStackTrace());
-			e.printStackTrace();
 		}
 		return obj.toString();
 	}
@@ -343,40 +338,31 @@ public class ApproveSDKWrapper {
 		} catch (UnsupportedDeviceException e) {
 			Log.d(LOG_TAG, "HID:getLoginFlow: UnsupportedDeviceException" + e.getStackTrace());
 			genericExecuteCallback(ApproveSDKConstants.HID_UNSUPPORTED_DEVICE_EXCEPTION, e.getMessage(), genericExecuteCallback);
-			e.printStackTrace();
 		} catch (InternalException e) {
 			Log.d(LOG_TAG, "HID:getLoginFlow: InternalException" + e.getStackTrace());
 			genericExecuteCallback(ApproveSDKConstants.HID_INTERNAL_EXCEPTION, e.getMessage(), genericExecuteCallback);
-			e.printStackTrace();
 		} catch (LostCredentialsException e) {
 			Log.d(LOG_TAG, "HID:getLoginFlow: LostCredentialsException" + e.getStackTrace());
 			genericExecuteCallback(ApproveSDKConstants.HID_LOST_CREDENTIALS_EXCEPTION, e.getMessage(), genericExecuteCallback);
-			e.printStackTrace();
 		} catch (AuthenticationException e) {
 			Log.d(LOG_TAG, "HID:getLoginFlow: AuthenticationException" + e.getStackTrace());
 			genericExecuteCallback(ApproveSDKConstants.HID_AUTHENTICATION_EXCEPTION, e.getMessage(), genericExecuteCallback);
-			e.printStackTrace();
 		} catch (FingerprintAuthenticationRequiredException e) {
 			Log.d(LOG_TAG, "HID:getLoginFlow: FingerprintAuthenticationRequiredException" + e.getStackTrace());
 			genericExecuteCallback(ApproveSDKConstants.HID_FINGERPRINT_AUTHENTICATION_REQUIRED_EXCEPTION, e.getMessage(),
 					genericExecuteCallback);
-			e.printStackTrace();
 		} catch (RemoteException e) {
 			Log.d(LOG_TAG, "HID:getLoginFlow: RemoteException" + e.getStackTrace());
 			genericExecuteCallback(ApproveSDKConstants.HID_REMOTE_EXCEPTION, e.getMessage(), genericExecuteCallback);
-			e.printStackTrace();
 		} catch (InvalidParameterException e) {
 			Log.d(LOG_TAG, "HID:getLoginFlow: InvalidParameterException" + e.getStackTrace());
 			genericExecuteCallback(ApproveSDKConstants.HID_INVALID_PARAMETER_EXCEPTION, e.getMessage(), genericExecuteCallback);
-			e.printStackTrace();
 		} catch (ServerOperationFailedException e) {
 			Log.d(LOG_TAG, "HID:getLoginFlow: ServerOperationFailedException" + e.getStackTrace());
 			genericExecuteCallback(ApproveSDKConstants.HID_SERVER_OPERATION_FAILED_EXCEPTION, e.getMessage(), genericExecuteCallback);
-			e.printStackTrace();
 		} catch (Exception e) {
 			Log.d(LOG_TAG, "HID:getLoginFlow: Exception" + e.getStackTrace());
 			genericExecuteCallback("Unhandled Exception", e.getMessage(), genericExecuteCallback);
-			e.printStackTrace();
 		}
 		return "Error";
 	}
@@ -459,12 +445,8 @@ public class ApproveSDKWrapper {
 				});
 			}
 			thread.start();
-		} catch (InternalException e) {
-			Log.d(LOG_TAG, "HID:generateOTP: InternalException" + e.getStackTrace());
-			e.printStackTrace();
 		} catch (Exception e) {
 			Log.d(LOG_TAG, "HID:generateOTP: Exception" + e.getStackTrace());
-			e.printStackTrace();
 		}
 	}
 
@@ -532,7 +514,6 @@ public class ApproveSDKWrapper {
 				boolean isEnabled = false;
 				String message = "Biometric enrollment got failed";
 				executeBioStatusCallback(bioStatusCallback, isEnabled, message);
-				e.printStackTrace();
 			}
 		} else {
 			executeBioStatusCallback(bioStatusCallback, false, "Device does not support biometric");
@@ -588,16 +569,12 @@ public class ApproveSDKWrapper {
 			}
 		} catch (UnsupportedDeviceException e) {
 			Log.d(LOG_TAG, "HID:checkForBioAvailability: UnsupportedDeviceException" + e.getStackTrace());
-			e.printStackTrace();
 		} catch (InternalException e) {
 			Log.d(LOG_TAG, "HID:checkForBioAvailability: InternalException" + e.getStackTrace());
-			e.printStackTrace();
 		} catch (LostCredentialsException e) {
 			Log.d(LOG_TAG, "HID:checkForBioAvailability: LostCredentialsException" + e.getStackTrace());
-			e.printStackTrace();
 		} catch (Exception e) {
 			Log.d(LOG_TAG, "HID:checkForBioAvailability: Exception" + e.getStackTrace());
-			e.printStackTrace();
 		}
 		return false;
 	}
@@ -650,16 +627,12 @@ public class ApproveSDKWrapper {
 			}
 		} catch (UnsupportedDeviceException e) {
 			Log.d(LOG_TAG, "HID:checkForBioAvailability: UnsupportedDeviceException " + e.getStackTrace());
-			e.printStackTrace();
 		} catch (InternalException e) {
 			Log.d(LOG_TAG, "HID:checkForBioAvailability: InternalException " + e.getStackTrace());
-			e.printStackTrace();
 		} catch (LostCredentialsException e) {
 			Log.d(LOG_TAG, "HID:checkForBioAvailability: LostCredentialsException " + e.getStackTrace());
-			e.printStackTrace();
 		} catch (Exception e) {
 			Log.d(LOG_TAG, "HID:checkForBioAvailability: Exception " + e.getStackTrace());
-			e.printStackTrace();
 		}
 		return false;
 	}
@@ -683,28 +656,20 @@ public class ApproveSDKWrapper {
 			}
 		} catch (UnsupportedDeviceException e) {
 			Log.d(LOG_TAG, "HID:disableBioMetrics: UnsupportedDeviceException " + e.getStackTrace());
-			e.printStackTrace();
 		} catch (InternalException e) {
 			Log.d(LOG_TAG, "HID:disableBioMetrics: InternalException " + e.getStackTrace());
-			e.printStackTrace();
 		} catch (LostCredentialsException e) {
 			Log.d(LOG_TAG, "HID:disableBioMetrics: LostCredentialsException " + e.getStackTrace());
-			e.printStackTrace();
 		} catch (FingerprintNotEnrolledException e) {
 			Log.d(LOG_TAG, "HID:disableBioMetrics: FingerprintNotEnrolledException " + e.getStackTrace());
-			e.printStackTrace();
 		} catch (FingerprintAuthenticationRequiredException e) {
 			Log.d(LOG_TAG, "HID:disableBioMetrics: FingerprintAuthenticationRequiredException " + e.getStackTrace());
-			e.printStackTrace();
 		} catch (AuthenticationException e) {
 			Log.d(LOG_TAG, "HID:disableBioMetrics: AuthenticationException " + e.getStackTrace());
-			e.printStackTrace();
 		} catch (PasswordExpiredException e) {
 			Log.d(LOG_TAG, "HID:disableBioMetrics: PasswordExpiredException " + e.getStackTrace());
-			e.printStackTrace();
 		} catch (Exception e) {
 			Log.d(LOG_TAG, "HID:disableBioMetrics: Exception " + e.getStackTrace());
-			e.printStackTrace();
 		}
 	}
 
@@ -750,7 +715,6 @@ public class ApproveSDKWrapper {
 			bioStatusCallback.execute(obj);
 		} catch (Exception e) {
 			Log.e(LOG_TAG, "HID:executeBioStatusCallback Exception in executeBioStatusCallback " + e.getStackTrace());
-			e.printStackTrace();
 		}
 	}
 
@@ -773,16 +737,12 @@ public class ApproveSDKWrapper {
 		    singleContainer = containers[0];
 		} catch (InternalException t) {
 			Log.e(LOG_TAG, "HID:getSingleUserContainer InternalException " + t.getStackTrace());
-			t.printStackTrace();
 		} catch (UnsupportedDeviceException t) {
 			Log.e(LOG_TAG, "HID:getSingleUserContainer UnsupportedDeviceException " + t.getStackTrace());
-			t.printStackTrace();
 		} catch (InvalidParameterException t) {
 			Log.e(LOG_TAG, "HID:getSingleUserContainer InvalidParameterException " + t.getStackTrace());
-			t.printStackTrace();
 		} catch (Exception e) {
 			Log.e(LOG_TAG, "HID:getSingleUserContainer Exception " + e.getStackTrace());
-			e.printStackTrace();
 		}
 		return singleContainer;
 	}
@@ -802,7 +762,6 @@ public class ApproveSDKWrapper {
 			callback.execute(params);
 		} catch (Exception e) {
 			Log.e(LOG_TAG, "HID:genericExecuteCallback Exception in genericExecuteCallback " + e.getStackTrace());
-			e.printStackTrace();
 		}
 	}
 
@@ -817,7 +776,6 @@ public class ApproveSDKWrapper {
 			callback.execute(params);
 		} catch (Exception e) {
 			Log.e(LOG_TAG, "HID:genericExecuteCallback Exception in genericExecuteCallback " + e.getStackTrace());
-			e.printStackTrace();
 		}
 	}
 
@@ -933,51 +891,39 @@ public class ApproveSDKWrapper {
 			Log.d(LOG_TAG, "HID:retriveTransaction: Transaction retreival complete");
 			callback.execute(new Object[] { ApproveSDKConstants.HID_SUCCESS_MESSAGE, ApproveSDKConstants.HID_NO_EXCEPTION, jsonObj });
 		} catch (InternalException e) {
-			e.printStackTrace();
 			callback.execute(new Object[] { ApproveSDKConstants.HID_ERROR_MESSAGE, ApproveSDKConstants.HID_INTERNAL_EXCEPTION, e.getMessage() });
 			Log.d(LOG_TAG, "HID:retriveTransaction: InternalException " + e.getStackTrace());
 		} catch (InvalidParameterException e) {
-			e.printStackTrace();
 			callback.execute(new Object[] { ApproveSDKConstants.HID_ERROR_MESSAGE, ApproveSDKConstants.HID_INVALID_PARAMETER_EXCEPTION, e.getMessage() });
 			Log.d(LOG_TAG, "HID:retriveTransaction: InvalidParameterException " + e.getStackTrace());
 		} catch (UnsupportedDeviceException e) {
-			e.printStackTrace();
 			callback.execute(new Object[] { ApproveSDKConstants.HID_ERROR_MESSAGE, ApproveSDKConstants.HID_UNSUPPORTED_DEVICE_EXCEPTION, e.getMessage() });
 			Log.d(LOG_TAG, "HID:retriveTransaction: UnsupportedDeviceException" + e.getStackTrace());
 		} catch (LostCredentialsException e) {
-			e.printStackTrace();
 			callback.execute(new Object[] { ApproveSDKConstants.HID_ERROR_MESSAGE, ApproveSDKConstants.HID_LOST_CREDENTIALS_EXCEPTION, e.getMessage() });
 			Log.d(LOG_TAG, "HID:retriveTransaction: LostCredentialsException " + e.getStackTrace());
 		} catch (InvalidContainerException e) {
-			e.printStackTrace();
 			callback.execute(new Object[] { ApproveSDKConstants.HID_ERROR_MESSAGE, ApproveSDKConstants.HID_INAVLID_CONTAINER_EXCEPTION, e.getMessage() });
 			Log.d(LOG_TAG, "HID:retriveTransaction: InvalidContainerException " + e.getStackTrace());
 		} catch (InexplicitContainerException e) {
-			e.printStackTrace();
 			callback.execute(new Object[] { ApproveSDKConstants.HID_ERROR_MESSAGE, ApproveSDKConstants.HID_INEXPLICIT_CONTAINER_EXCEPTION, e.getMessage() });
 			Log.d(LOG_TAG, "HID:retriveTransaction: InexplicitContainerException " + e.getStackTrace());
 		} catch (AuthenticationException e) {
-			e.printStackTrace();
 			callback.execute(new Object[] { ApproveSDKConstants.HID_ERROR_MESSAGE, ApproveSDKConstants.HID_AUTHENTICATION_EXCEPTION, e.getMessage() });
 			Log.d(LOG_TAG, "HID:retriveTransaction: AuthenticationException " + e.getStackTrace());
 		} catch (RemoteException e) {
-			e.printStackTrace();
 			callback.execute(new Object[] { ApproveSDKConstants.HID_ERROR_MESSAGE, ApproveSDKConstants.HID_REMOTE_EXCEPTION, e.getMessage() });
 			Log.d(LOG_TAG, "HID:retriveTransaction: RemoteException " + e.getStackTrace());
 		} catch (PasswordExpiredException e) {
-			e.printStackTrace();
 			callback.execute(new Object[] { ApproveSDKConstants.HID_ERROR_MESSAGE, ApproveSDKConstants.HID_PASSWORD_EXPIRED_EXCEPTION, e.getMessage() });
 			Log.d(LOG_TAG, "HID:retriveTransaction: PasswordExpiredException " + e.getStackTrace());
 		} catch (TransactionExpiredException e) {
-			e.printStackTrace();
 			callback.execute(new Object[] { ApproveSDKConstants.HID_ERROR_MESSAGE, ApproveSDKConstants.HID_TRANSACTION_EXPIRED_EXCEPTION, e.getMessage() });
 			Log.d(LOG_TAG, "HID:retriveTransaction: TransactionExpiredException " + e.getStackTrace());
 		} catch (ServerOperationFailedException e) {
-			e.printStackTrace();
 			callback.execute(new Object[] { ApproveSDKConstants.HID_ERROR_MESSAGE, ApproveSDKConstants.HID_SERVER_OPERATION_FAILED_EXCEPTION, e.getMessage() });
 			Log.d(LOG_TAG, "HID:retriveTransaction: ServerOperationFailedException " + e.getStackTrace());
 		} catch (Exception e) {
-			e.printStackTrace();
 			callback.execute(new Object[] { ApproveSDKConstants.HID_ERROR_MESSAGE, ApproveSDKConstants.HID_GENERIC_EXCEPTION, e.getMessage() });
 			Log.d(LOG_TAG, "HID:retriveTransaction: Exception " + e.getStackTrace());
 		}
@@ -1027,7 +973,6 @@ public class ApproveSDKWrapper {
 									genericExecuteCallback(new Object[] { ApproveSDKConstants.HID_ERROR_MESSAGE, e.getClass().getName(),
 											ApproveSDKConstants.HID_NO_EXCEPTION_CODE }, callback);
 									Log.d(LOG_TAG, "HID:verifyPassword: onAuthSuccess Exception " + e.getStackTrace());
-									e.printStackTrace();
 								}
 								genericExecuteCallback(new Object[] { ApproveSDKConstants.HID_SUCCESS_MESSAGE, "No Exception",
 										ApproveSDKConstants.HID_NO_EXCEPTION_CODE }, callback);								
@@ -1051,54 +996,44 @@ public class ApproveSDKWrapper {
 							ApproveSDKConstants.HID_BIOMETRIC_ERROR_CODE }, callback);
 					Log.d(LOG_TAG,
 							"HID:verifyPassword: FingerprintAuthenticationRequiredException " + fe.getStackTrace());
-					fe.printStackTrace();
 				} catch (InternalException e) {
 					genericExecuteCallback(
 							new Object[] { ApproveSDKConstants.HID_ERROR_MESSAGE, ApproveSDKConstants.HID_INTERNAL_EXCEPTION, ApproveSDKConstants.HID_GENERIC_ERROR_CODE },
 							callback);
 					Log.d(LOG_TAG, "HID:verifyPassword: InternalException" + e.getStackTrace());
-					e.printStackTrace();
 				} catch (UnsupportedDeviceException e) {
 					genericExecuteCallback(new Object[] { ApproveSDKConstants.HID_ERROR_MESSAGE, ApproveSDKConstants.HID_UNSUPPORTED_DEVICE_EXCEPTION,
 							ApproveSDKConstants.HID_GENERIC_ERROR_CODE }, callback);
 					Log.d(LOG_TAG, "HID:verifyPassword: UnsupportedDeviceException" + e.getStackTrace());
-					e.printStackTrace();
 				} catch (LostCredentialsException e) {
 					genericExecuteCallback(new Object[] { ApproveSDKConstants.HID_ERROR_MESSAGE, ApproveSDKConstants.HID_LOST_CREDENTIALS_EXCEPTION,
 							ApproveSDKConstants.HID_GENERIC_ERROR_CODE }, callback);
 					Log.d(LOG_TAG, "HID:verifyPassword: LostCredentialsException" + e.getStackTrace());
-					e.printStackTrace();
 				} catch (AuthenticationException e) {
 					genericExecuteCallback(
 							new Object[] { ApproveSDKConstants.HID_ERROR_MESSAGE, ApproveSDKConstants.HID_AUTHENTICATION_EXCEPTION, ApproveSDKConstants.HID_GENERIC_ERROR_CODE },
 							callback);
 					Log.d(LOG_TAG, "HID:verifyPassword: AuthenticationException " + e.getStackTrace());
-					e.printStackTrace();
 				} catch (PasswordExpiredException e) {
 					genericExecuteCallback(new Object[] { ApproveSDKConstants.HID_ERROR_MESSAGE, ApproveSDKConstants.HID_PASSWORD_EXPIRED_EXCEPTION,
 							ApproveSDKConstants.HID_GENERIC_ERROR_CODE }, callback);
 					Log.d(LOG_TAG, "HID:verifyPassword: PasswordExpiredException " + e.getStackTrace());
-					e.printStackTrace();
 				} catch (FingerprintNotEnrolledException e) {
 					genericExecuteCallback(new Object[] { ApproveSDKConstants.HID_ERROR_MESSAGE, ApproveSDKConstants.HID_FINGERPRINT_NOT_ENROLLED_EXCEPTION,
 							ApproveSDKConstants.HID_GENERIC_ERROR_CODE }, callback);
 					Log.d(LOG_TAG, "HID:verifyPassword: FingerprintNotEnrolledException " + e.getStackTrace());
-					e.printStackTrace();
 				} catch (PasswordRequiredException e) {
 					genericExecuteCallback(new Object[] { ApproveSDKConstants.HID_ERROR_MESSAGE, ApproveSDKConstants.HID_PASSWORD_REQUIRED_EXCEPTION,
 							ApproveSDKConstants.HID_GENERIC_ERROR_CODE }, callback);
 					Log.d(LOG_TAG, "HID:verifyPassword: PasswordRequiredException " + e.getStackTrace());
-					e.printStackTrace();
 				} catch (InvalidParameterException e) {
 					genericExecuteCallback(new Object[] { ApproveSDKConstants.HID_ERROR_MESSAGE, ApproveSDKConstants.HID_INVALID_PARAMETER_EXCEPTION,
 							ApproveSDKConstants.HID_GENERIC_ERROR_CODE }, callback);
 					Log.d(LOG_TAG, "HID:verifyPassword: InvalidParameterException " + e.getStackTrace());
-					e.printStackTrace();
 				} catch (Exception e) {
 					genericExecuteCallback(new Object[] { ApproveSDKConstants.HID_ERROR_MESSAGE, ApproveSDKConstants.HID_BIOMETRIC_ERROR,
 							ApproveSDKConstants.HID_BIOMETRIC_ERROR_CODE }, callback);
 					Log.d(LOG_TAG, "HID:verifyPassword: Generic Exception " + e.getStackTrace());
-					e.printStackTrace();
 				}
 			} else {
 				try {
@@ -1114,37 +1049,30 @@ public class ApproveSDKWrapper {
 							new Object[] { ApproveSDKConstants.HID_ERROR_MESSAGE, ApproveSDKConstants.HID_INTERNAL_EXCEPTION, ApproveSDKConstants.HID_GENERIC_ERROR_CODE },
 							callback);
 					Log.d(LOG_TAG, "HID:verifyPassword: InternalException " + e.getStackTrace());
-					e.printStackTrace();
 				} catch (UnsupportedDeviceException e) {
 					genericExecuteCallback(new Object[] { ApproveSDKConstants.HID_ERROR_MESSAGE, ApproveSDKConstants.HID_UNSUPPORTED_DEVICE_EXCEPTION,
 							ApproveSDKConstants.HID_GENERIC_ERROR_CODE }, callback);
 					Log.d(LOG_TAG, "HID:verifyPassword: UnsupportedDeviceException " + e.getStackTrace());
-					e.printStackTrace();
 				} catch (LostCredentialsException e) {
 					genericExecuteCallback(new Object[] { ApproveSDKConstants.HID_ERROR_MESSAGE, ApproveSDKConstants.HID_LOST_CREDENTIALS_EXCEPTION,
 							ApproveSDKConstants.HID_GENERIC_ERROR_CODE }, callback);
 					Log.d(LOG_TAG, "HID:verifyPassword: LostCredentialsException " + e.getStackTrace());
-					e.printStackTrace();
 				} catch (PasswordExpiredException e) {
 					genericExecuteCallback(new Object[] { ApproveSDKConstants.HID_ERROR_MESSAGE, ApproveSDKConstants.HID_PASSWORD_EXPIRED_EXCEPTION,
 							ApproveSDKConstants.HID_GENERIC_ERROR_CODE }, callback);
 					Log.d(LOG_TAG, "HID:verifyPassword: PasswordExpiredException " + e.getStackTrace());
-					e.printStackTrace();
 				} catch (FingerprintNotEnrolledException e) {
 					genericExecuteCallback(new Object[] { ApproveSDKConstants.HID_ERROR_MESSAGE, ApproveSDKConstants.HID_FINGERPRINT_NOT_ENROLLED_EXCEPTION,
 							ApproveSDKConstants.HID_GENERIC_ERROR_CODE }, callback);
 					Log.d(LOG_TAG, "HID:verifyPassword: FingerprintNotEnrolledException " + e.getStackTrace());
-					e.printStackTrace();
 				} catch (PasswordRequiredException e) {
 					genericExecuteCallback(new Object[] { ApproveSDKConstants.HID_ERROR_MESSAGE, ApproveSDKConstants.HID_PASSWORD_REQUIRED_EXCEPTION,
 							ApproveSDKConstants.HID_GENERIC_ERROR_CODE }, callback);
 					Log.d(LOG_TAG, "HID:verifyPassword: PasswordRequiredException " + e.getStackTrace());
-					e.printStackTrace();
 				} catch (InvalidParameterException e) {
 					genericExecuteCallback(new Object[] { ApproveSDKConstants.HID_ERROR_MESSAGE, ApproveSDKConstants.HID_INVALID_PARAMETER_EXCEPTION,
 							ApproveSDKConstants.HID_GENERIC_ERROR_CODE }, callback);
 					Log.d(LOG_TAG, "HID:verifyPassword: InvalidParameterException " + e.getStackTrace());
-					e.printStackTrace();
 				} catch (Exception e) {
 					genericExecuteCallback(
 							new Object[] { ApproveSDKConstants.HID_ERROR_MESSAGE, e.getClass().getName(), ApproveSDKConstants.HID_NO_EXCEPTION_CODE },
@@ -1263,38 +1191,29 @@ public class ApproveSDKWrapper {
 		}catch(AuthenticationException e) {
 			Log.d(LOG_TAG, "HID:transactionCancel: AuthenticationException " + e.getStackTrace());
 			genericExecuteCallback(ApproveSDKConstants.HID_AUTHENTICATION_EXCEPTION, e.getMessage(), cancelCallback);
-			e.printStackTrace();
 		}catch (InternalException e) {
 			Log.d(LOG_TAG, "HID:transactionCancel: InternalException " + e.getStackTrace());
 			genericExecuteCallback(ApproveSDKConstants.HID_INTERNAL_EXCEPTION, e.getMessage(), cancelCallback);
-			e.printStackTrace();
 		}catch (InvalidParameterException e) {
 			Log.d(LOG_TAG, "HID:transactionCancel: InvalidParameterException " + e.getStackTrace());
 			genericExecuteCallback(ApproveSDKConstants.HID_INVALID_PARAMETER_EXCEPTION, e.getMessage(), cancelCallback);
-			e.printStackTrace();
 		}catch (PasswordExpiredException e) {
 			Log.d(LOG_TAG, "HID:transactionCancel: PasswordExpiredException " + e.getStackTrace());
 			genericExecuteCallback(ApproveSDKConstants.HID_PASSWORD_EXPIRED_EXCEPTION, e.getMessage(), cancelCallback);
-			e.printStackTrace();
 		}catch (RemoteException e) {
 			Log.d(LOG_TAG, "HID:transactionCancel: RemoteException " + e.getStackTrace());
 			genericExecuteCallback(ApproveSDKConstants.HID_REMOTE_EXCEPTION, e.getMessage(), cancelCallback);
-			e.printStackTrace();
 		}catch (ServerUnsupportedOperationException e) {
 			Log.d(LOG_TAG, "HID:transactionCancel: ServerUnsupportedOperationException " + e.getStackTrace());
 			genericExecuteCallback(ApproveSDKConstants.HID_SERVER_UNSUPPORTED_OPERATION_EXCEPTION, e.getMessage(), cancelCallback);
-			e.printStackTrace();
 		}catch (TransactionCanceledException e) {
 			Log.d(LOG_TAG, "HID:transactionCancel: TransactionCanceledException " + e.getStackTrace());
 			genericExecuteCallback(ApproveSDKConstants.HID_TRANSACTION_CANCELED_EXCEPTION, e.getMessage(), cancelCallback);
-			e.printStackTrace();
 		}catch (TransactionExpiredException e) {
 			Log.d(LOG_TAG, "HID:transactionCancel: TransactionExpiredException " + e.getStackTrace());
 			genericExecuteCallback(ApproveSDKConstants.HID_TRANSACTION_EXPIRED_EXCEPTION, e.getMessage(), cancelCallback);
-			e.printStackTrace();
 		}catch(Exception e) {
 			Log.d(LOG_TAG, "HID:transactionCancel: Exception " + e.getStackTrace());
-			e.printStackTrace();
 		}
 	}
 
@@ -1361,7 +1280,6 @@ public class ApproveSDKWrapper {
 			Device device = DeviceFactory.getDevice(appContext, new ConnectionConfiguration());
 			device.deleteContainer(singleContainer.getId(), null);
 		} catch (Exception e) {
-			e.printStackTrace();
 			Log.d(LOG_TAG, "HID:deleteContainer: Exception" + e.getStackTrace());
 			return false;
 		}
@@ -1388,7 +1306,6 @@ public class ApproveSDKWrapper {
 			}
 			deleteContainer(this.appContext, singleContainer, reasonParam);
 		} catch (Exception e) {
-			e.printStackTrace();
 			Log.d(LOG_TAG, "HID:deleteContainerWithReason: Exception " + e.getStackTrace());
 			return false;
 		}
@@ -1411,11 +1328,9 @@ public class ApproveSDKWrapper {
 			Device device = DeviceFactory.getDevice(appContext, new ConnectionConfiguration());
 			device.deleteContainer(container.getId(), null);
 		} catch (InternalException e) {
-			e.printStackTrace();
 			Log.d(LOG_TAG, "HID:deleteContainer: InternalException " + e.getStackTrace());
 			return false;
 		} catch (Exception e) {
-			e.printStackTrace();
 			Log.d(LOG_TAG, "HID:deleteContainer: Exception " + e.getStackTrace());
 			return false;
 		}
@@ -1436,11 +1351,9 @@ public class ApproveSDKWrapper {
 			Device device = DeviceFactory.getDevice(appContext, new ConnectionConfiguration());
 			device.deleteContainer(container.getId(), null, reason);
 		} catch (InternalException e) {
-			e.printStackTrace();
 			Log.d(LOG_TAG, "HID:deleteContainer: InternalException " + e.getStackTrace());
 			return false;
 		} catch (Exception e) {
-			e.printStackTrace();
 			Log.d(LOG_TAG, "HID:deleteContainer: Exception " + e.getStackTrace());
 			return false;
 		}
@@ -1477,7 +1390,6 @@ public class ApproveSDKWrapper {
 								} catch (Exception e) {
 									executeDeleteContainerCB(callback, ApproveSDKConstants.HID_FAILURE_MESSAGE);
 									Log.d(LOG_TAG, "HID:deleteContainerWithAuth: Exception " + e.getStackTrace());
-									e.printStackTrace();
 								}
 							}
 
@@ -1506,44 +1418,34 @@ public class ApproveSDKWrapper {
 			}
 		} catch (AuthenticationException e) {
 			Log.d(LOG_TAG, "HID:deleteContainerWithAuth: AuthenticationException " + e.getStackTrace());
-			e.printStackTrace();
 			executeDeleteContainerCB(callback, ApproveSDKConstants.HID_AUTHENTICATION_EXCEPTION);
 		} catch (PasswordRequiredException e) {
 			Log.d(LOG_TAG, "HID:deleteContainerWithAuth: PasswordRequiredException " + e.getStackTrace());
-			e.printStackTrace();
 			executeDeleteContainerCB(callback, ApproveSDKConstants.HID_AUTHENTICATION_EXCEPTION);
 		} catch (FingerprintAuthenticationRequiredException e) {
 			Log.d(LOG_TAG,
 					"HID:deleteContainerWithAuth: FingerprintAuthenticationRequiredException " + e.getStackTrace());
-			e.printStackTrace();
 			executeDeleteContainerCB(callback, ApproveSDKConstants.HID_FINGERPRINT_AUTHENTICATION_REQUIRED_EXCEPTION);
 		} catch (FingerprintNotEnrolledException e) {
 			Log.d(LOG_TAG, "HID:deleteContainerWithAuth: FingerprintNotEnrolledException " + e.getStackTrace());
-			e.printStackTrace();
 			executeDeleteContainerCB(callback, ApproveSDKConstants.HID_FINGERPRINT_NOT_ENROLLED_EXCEPTION);
 		} catch (UnsupportedDeviceException e) {
 			Log.d(LOG_TAG, "HID:deleteContainerWithAuth: UnsupportedDeviceException " + e.getStackTrace());
-			e.printStackTrace();
 			executeDeleteContainerCB(callback, ApproveSDKConstants.HID_UNSUPPORTED_DEVICE_EXCEPTION);
 		} catch (InternalException e) {
 			Log.d(LOG_TAG, "HID:deleteContainerWithAuth: InternalException " + e.getStackTrace());
-			e.printStackTrace();
 			executeDeleteContainerCB(callback, ApproveSDKConstants.HID_INTERNAL_EXCEPTION);
 		} catch (LostCredentialsException e) {
 			Log.d(LOG_TAG, "HID:deleteContainerWithAuth: LostCredentialsException " + e.getStackTrace());
-			e.printStackTrace();
 			executeDeleteContainerCB(callback, ApproveSDKConstants.HID_LOST_CREDENTIALS_EXCEPTION);
 		} catch (PasswordExpiredException e) {
 			Log.d(LOG_TAG, "HID:deleteContainerWithAuth: PasswordExpiredException " + e.getStackTrace());
-			e.printStackTrace();
 			executeDeleteContainerCB(callback, ApproveSDKConstants.HID_PASSWORD_EXPIRED_EXCEPTION);
 		} catch (InvalidParameterException e) {
 			Log.d(LOG_TAG, "HID:deleteContainerWithAuth: InvalidParameterException " + e.getStackTrace());
-			e.printStackTrace();
 			executeDeleteContainerCB(callback, ApproveSDKConstants.HID_INVALID_PARAMETER_EXCEPTION);
 		} catch (Exception e) {
 			Log.d(LOG_TAG, "HID:deleteContainerWithAuth: Exception " + e.getStackTrace());
-			e.printStackTrace();
 			executeDeleteContainerCB(callback, ApproveSDKConstants.HID_GENERIC_EXCEPTION);
 		}
 	}
@@ -1583,7 +1485,6 @@ public class ApproveSDKWrapper {
 								} catch (Exception e) {
 									executeDeleteContainerCB(callback, ApproveSDKConstants.HID_FAILURE_MESSAGE);
 									Log.d(LOG_TAG, "HID:deleteContainerAuthWithReason: Exception " + e.getStackTrace());
-									e.printStackTrace();
 								}
 							}
 
@@ -1613,44 +1514,34 @@ public class ApproveSDKWrapper {
 			}
 		} catch (AuthenticationException e) {
 			Log.d(LOG_TAG, "HID:deleteContainerAuthWithReason: AuthenticationException " + e.getStackTrace());
-			e.printStackTrace();
 			executeDeleteContainerCB(callback, ApproveSDKConstants.HID_AUTHENTICATION_EXCEPTION);
 		} catch (PasswordRequiredException e) {
 			Log.d(LOG_TAG, "HID:deleteContainerAuthWithReason: PasswordRequiredException " + e.getStackTrace());
-			e.printStackTrace();
 			executeDeleteContainerCB(callback, ApproveSDKConstants.HID_AUTHENTICATION_EXCEPTION);
 		} catch (FingerprintAuthenticationRequiredException e) {
 			Log.d(LOG_TAG, "HID:deleteContainerAuthWithReason: FingerprintAuthenticationRequiredException "
 					+ e.getStackTrace());
-			e.printStackTrace();
 			executeDeleteContainerCB(callback, ApproveSDKConstants.HID_FINGERPRINT_AUTHENTICATION_REQUIRED_EXCEPTION);
 		} catch (FingerprintNotEnrolledException e) {
 			Log.d(LOG_TAG, "HID:deleteContainerAuthWithReason: FingerprintNotEnrolledException " + e.getStackTrace());
-			e.printStackTrace();
 			executeDeleteContainerCB(callback, ApproveSDKConstants.HID_FINGERPRINT_NOT_ENROLLED_EXCEPTION);
 		} catch (UnsupportedDeviceException e) {
 			Log.d(LOG_TAG, "HID:deleteContainerAuthWithReason: UnsupportedDeviceException " + e.getStackTrace());
-			e.printStackTrace();
 			executeDeleteContainerCB(callback, ApproveSDKConstants.HID_UNSUPPORTED_DEVICE_EXCEPTION);
 		} catch (InternalException e) {
 			Log.d(LOG_TAG, "HID:deleteContainerAuthWithReason: InternalException " + e.getStackTrace());
-			e.printStackTrace();
 			executeDeleteContainerCB(callback, ApproveSDKConstants.HID_INTERNAL_EXCEPTION);
 		} catch (LostCredentialsException e) {
 			Log.d(LOG_TAG, "HID:deleteContainerAuthWithReason: LostCredentialsException " + e.getStackTrace());
-			e.printStackTrace();
 			executeDeleteContainerCB(callback, ApproveSDKConstants.HID_LOST_CREDENTIALS_EXCEPTION);
 		} catch (PasswordExpiredException e) {
 			Log.d(LOG_TAG, "HID:deleteContainerAuthWithReason: PasswordExpiredException " + e.getStackTrace());
-			e.printStackTrace();
 			executeDeleteContainerCB(callback, ApproveSDKConstants.HID_PASSWORD_EXPIRED_EXCEPTION);
 		} catch (InvalidParameterException e) {
 			Log.d(LOG_TAG, "HID:deleteContainerAuthWithReason: InvalidParameterException " + e.getStackTrace());
-			e.printStackTrace();
 			executeDeleteContainerCB(callback, ApproveSDKConstants.HID_INVALID_PARAMETER_EXCEPTION);
 		} catch (Exception e) {
 			Log.d(LOG_TAG, "HID:deleteContainerAuthWithReason: Exception " + e.getStackTrace());
-			e.printStackTrace();
 			executeDeleteContainerCB(callback, ApproveSDKConstants.HID_GENERIC_EXCEPTION);
 		}
 	}
@@ -1666,7 +1557,6 @@ public class ApproveSDKWrapper {
 			callback.execute(new Object[] { msg });
 		} catch (Exception e) {
 			Log.d(LOG_TAG, "HID:deleteContainerWithAuth executeDeleteContainerCB: Exception " + e.getStackTrace());
-			e.printStackTrace();
 		}
 	}
 
@@ -1685,7 +1575,6 @@ public class ApproveSDKWrapper {
 
 		} catch (Exception e) {
 			Log.d(LOG_TAG, "HID:getDeviceProperty Exception " + e.getStackTrace());
-			e.printStackTrace();
 		}
 		Log.d(LOG_TAG, "HID:getDeviceProperty DeviceId--> " + deviceId);
 		return deviceId;
@@ -1742,19 +1631,14 @@ public class ApproveSDKWrapper {
 
 		} catch (UnsupportedDeviceException ude) {
 			Log.d(LOG_TAG, "HID:getMultiContainerFriendlyName UnsupportedDeviceException " + ude.getStackTrace());
-			ude.printStackTrace();
 		} catch (LostCredentialsException lce) {
 			Log.d(LOG_TAG, "HID:getMultiContainerFriendlyName LostCredentialsException " + lce.getStackTrace());
-			lce.printStackTrace();
 		} catch (InternalException ie) {
 			Log.d(LOG_TAG, "HID:getMultiContainerFriendlyName InternalException " + ie.getStackTrace());
-			ie.printStackTrace();
 		} catch (InvalidParameterException ipe) {
 			Log.d(LOG_TAG, "HID:getMultiContainerFriendlyName InvalidParameterException " + ipe.getStackTrace());
-			ipe.printStackTrace();
 		} catch (Exception e) {
 			Log.d(LOG_TAG, "HID:getMultiContainerFriendlyName Exception " + e.getStackTrace());
-			e.printStackTrace();
 		}
 		return "Error";
 	}
@@ -1796,25 +1680,20 @@ public class ApproveSDKWrapper {
 			executeSetNameCallback(setNameCallback, ApproveSDKConstants.HID_UNSUPPORTED_DEVICE_EXCEPTION,
 					ApproveSDKConstants.HID_UNSUPPORTED_DEVICE_CODE);
 			Log.e(LOG_TAG, "HID:setContainerFriendlyName UnsupportedDeviceException " + ude.getStackTrace());
-			ude.printStackTrace();
 		} catch (LostCredentialsException lce) {
 			executeSetNameCallback(setNameCallback, ApproveSDKConstants.HID_LOST_CREDENTIALS_EXCEPTION,
 					ApproveSDKConstants.HID_LOST_CREDENTIALS_CODE);
 			Log.e(LOG_TAG, "HID:setContainerFriendlyName LostCredentialsException " + lce.getStackTrace());
-			lce.printStackTrace();
 		} catch (InternalException ie) {
 			executeSetNameCallback(setNameCallback, ApproveSDKConstants.HID_INTERNAL_EXCEPTION,
 					ApproveSDKConstants.HID_INTERNAL_EXCEPTION_CODE);
 			Log.e(LOG_TAG, "HID:setContainerFriendlyName InternalException " + ie.getStackTrace());
-			ie.printStackTrace();
 		} catch (InvalidParameterException ipe) {
 			executeSetNameCallback(setNameCallback, ApproveSDKConstants.HID_INVALID_PARAMETER_EXCEPTION,
 					ApproveSDKConstants.HID_INVALID_PARAMETER_CODE);
 			Log.e(LOG_TAG, "HID:setContainerFriendlyName InvalidParameterException " + ipe.getStackTrace());
-			ipe.printStackTrace();
 		} catch (Exception e) {
 			Log.e(LOG_TAG, "HID:setContainerFriendlyName Exception " + e.getStackTrace());
-			e.printStackTrace();
 		}
 
 	}
@@ -1834,7 +1713,6 @@ public class ApproveSDKWrapper {
 			Log.d(LOG_TAG, "HID:executeSetNameCallback Callback Executed with EventCode " + eventCode);
 		} catch (Exception e) {
 			Log.e(LOG_TAG, "HID:executeSetNameCallback executeSetNameCallback Exception " + e.getStackTrace());
-			e.printStackTrace();
 		}
 		Log.d(LOG_TAG, "HID:executeSetNameCallback executeSetNameCallback");
 	}
@@ -1933,19 +1811,14 @@ public class ApproveSDKWrapper {
 
 		} catch (UnsupportedDeviceException ude) {
 			Log.d(LOG_TAG, "HID:getLockPolicy: UnsupportedDeviceException " + ude.getStackTrace());
-			ude.printStackTrace();
 		} catch (LostCredentialsException lce) {
 			Log.d(LOG_TAG, "HID:getLockPolicy: LostCredentialsException " + lce.getStackTrace());
-			lce.printStackTrace();
 		} catch (InternalException ie) {
 			Log.d(LOG_TAG, "HID:getLockPolicy: InternalException " + ie.getStackTrace());
-			ie.printStackTrace();
 		} catch (InvalidParameterException ipe) {
 			Log.d(LOG_TAG, "HID:getLockPolicy: InvalidParameterException " + ipe.getStackTrace());
-			ipe.printStackTrace();
 		} catch (Exception e) {
 			Log.d(LOG_TAG, "HID:getLockPolicy: Exception " + e.getStackTrace());
-			e.printStackTrace();
 		}
 		return null;
 	}
@@ -2008,7 +1881,6 @@ public class ApproveSDKWrapper {
 			Log.d(LOG_TAG, "HID:getInfo: Get Info: " + getInfo.toString());
 		} catch (Exception e) {
 			Log.d(LOG_TAG, "HID:getInfo: Exception " + e.getStackTrace());
-			e.printStackTrace();
 			return null;
 
 		}
@@ -2068,7 +1940,6 @@ public class ApproveSDKWrapper {
 
 		} catch (Exception e) {
 			Log.d(LOG_TAG, "HID:getKeyList: Exception " + e.getStackTrace());
-			e.printStackTrace();
 			return null;
 		}
 		return result.toString();
@@ -2217,27 +2088,21 @@ public class ApproveSDKWrapper {
 
             } catch(InternalException ie) {
     			Log.d(LOG_TAG, "HID:directClientSignature: InternalException " + ie.getStackTrace());
-    			ie.printStackTrace();
     			genericExecuteCallback("InternalException", ie.getMessage(), generateCallback);
     		}catch(InvalidParameterException ipe) {
     			Log.d(LOG_TAG, "HID:directClientSignature: InvalidParameterException " + ipe.getStackTrace());
-    			ipe.printStackTrace();
     			genericExecuteCallback("InvalidParameterException", ipe.getMessage(), generateCallback);
     		}catch(ServerUnsupportedOperationException sue) {
     			Log.d(LOG_TAG, "HID:directClientSignature: ServerUnsupportedOperationException " + sue.getStackTrace());
-    			sue.printStackTrace();
     			genericExecuteCallback("ServerUnsupportedOperationException", sue.getMessage(), generateCallback);
     		}catch(LostCredentialsException lce) {
     			Log.d(LOG_TAG, "HID:directClientSignature: LostCredentialsException " + lce.getStackTrace());
-    			lce.printStackTrace();
     			genericExecuteCallback("LostCredentialsException", lce.getMessage(), generateCallback);
     		}catch(UnsupportedDeviceException ude) {
     			Log.d(LOG_TAG, "HID:directClientSignature: UnsupportedDeviceException " + ude.getStackTrace());
-    			ude.printStackTrace();
     			genericExecuteCallback("UnsupportedDeviceException", ude.getMessage(), generateCallback);
     		}catch(Exception e) {
     			Log.d(LOG_TAG, "HID:directClientSignature: Exception " + e.getStackTrace());
-    			e.printStackTrace();
     			genericExecuteCallback("Exception", e.getMessage(), generateCallback);
     		}
         }).start();
@@ -2301,7 +2166,7 @@ public class ApproveSDKWrapper {
 	                	try {
 							handleSetStatusException(e, dcsCallback);
 						} catch (Exception e1) {
-							e1.printStackTrace();
+							Log.d(LOG_TAG, "HID:directClientSignatureWithStatus: Exception in handleSetStatusException " + e1.getStackTrace());
 						}
 	                } 
 	            }).start();
@@ -2333,6 +2198,7 @@ public class ApproveSDKWrapper {
 	        dcsCallback.execute(new Object[]{"TransactionStatus", resultJson.toString()});
 	    } catch (JSONException e) {
 	    	dcsCallback.execute(new Object[]{"JSONException", e.getMessage()});
+			Log.d(LOG_TAG, "HID:sendTransactionStatusResult: JSONException " + e.getStackTrace());
 	    }
 	}
 	

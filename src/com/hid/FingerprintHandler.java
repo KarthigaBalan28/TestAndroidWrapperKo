@@ -2,9 +2,10 @@ package com.hid;
 
 import android.util.Log;
 import androidx.biometric.BiometricPrompt;
-
+@SuppressWarnings({"java:S1068", "java:S3008"})
 public class FingerprintHandler extends BiometricPrompt.AuthenticationCallback {
-	private static final String LOG_TAG = ApproveSDKConstants.HID_LOG_TAG;
+	private static int maxAttempts = 3;
+	private static String LOG_TAG = ApproveSDKConstants.HID_LOG_TAG;
 	private BiometricEventListener biometricEventListener;
 
 	public FingerprintHandler(BiometricEventListener biometricEventListener) {

@@ -18,7 +18,6 @@ import com.hidglobal.ia.service.protectionpolicy.ProtectionPolicy;
 import com.hidglobal.ia.service.transaction.Container;
 import com.hidglobal.ia.service.transaction.Key;
 import com.konylabs.vm.Function;
-import android.content.Context;
 import android.util.Log;
 import androidx.fragment.app.FragmentActivity;
 @SuppressWarnings({"java:S3776"})
@@ -34,8 +33,7 @@ public class OTPGeneratorSync implements Runnable {
 	private Container container;
 
 	public OTPGeneratorSync(FragmentActivity activity, String password, boolean isBiometricEnabled,
-			Function otpSuccessCallback, Function otpFailureCallback, Container container, String otpLabel)
-			throws InternalException {
+			Function otpSuccessCallback, Function otpFailureCallback, Container container, String otpLabel){
 		this.activity = activity;
 		this.password = password;
 		this.isBiometricEnabled = isBiometricEnabled;
@@ -150,7 +148,6 @@ public class OTPGeneratorSync implements Runnable {
 		} catch (Exception e) {
 			otpFailureCallback("Exception", e.getMessage(), otpFailureCallback);
 			Log.d(LOG_TAG, "HID:generateOTP - Unhandled Exception : " + e.getStackTrace());
-			e.printStackTrace();
 		}
 	}
 
@@ -162,7 +159,6 @@ public class OTPGeneratorSync implements Runnable {
 			callback.execute(params);
 		} catch (Exception e) {
 			Log.d(LOG_TAG, "HID:generateOTP - Unhandled Exception : " + e.getStackTrace());
-			e.printStackTrace();
 		}
 	}
 }

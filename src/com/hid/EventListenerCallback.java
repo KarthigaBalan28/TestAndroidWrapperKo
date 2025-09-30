@@ -13,7 +13,7 @@ import com.konylabs.vm.Function;
 
 import android.content.Context;
 import android.util.Log;
-@SuppressWarnings({"java:S1068", "java:S2142"})
+@SuppressWarnings({"java:S1068", "java:S2142", "java:S2274"})
 public class EventListenerCallback implements EventListener {
 	private Context appContext;
 	private WaitNotifyMonitor monitor;
@@ -50,7 +50,6 @@ public class EventListenerCallback implements EventListener {
 				obj.put("minSpl", policy.getMinNonAlpha());
 			} catch (JSONException e2) {
 				Log.d(LOG_TAG, "HID:EventListenerCallback onEventReceived JSONException" + e2.getStackTrace());
-				e2.printStackTrace();
 			}
 
 			Object[] params = new Object[2];
@@ -60,14 +59,12 @@ public class EventListenerCallback implements EventListener {
 				promptCallback.execute(params);
 			} catch (Exception e1) {
 				Log.d(LOG_TAG, "HID:EventListenerCallback onEventReceived Exception" + e1.getStackTrace());
-				e1.printStackTrace();
 			}
 			synchronized (monitor) {
 				try {
 					monitor.wait();
 				} catch (InterruptedException e) {
 					Log.d(LOG_TAG, "HID:EventListenerCallback onEventReceived InterruptedException" + e.getStackTrace());
-					e.printStackTrace();
 				}
 				Log.d(LOG_TAG, "HID:EventListenerCallback onEventReceived Got notified with Password");
 				PasswordPromptResult result = new PasswordPromptResult(EventResult.Code.Continue);
